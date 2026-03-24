@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
-import type { Inspection } from '@inspector-gnome/shared';
+import type { Scan } from '@inspector-gnome/shared';
 
-interface InspectionState {
-  currentInspection: Inspection | null;
+interface ScanState {
+  currentScan: Scan | null;
   isLoading: boolean;
   error: string | null;
 }
 
-const initialState: InspectionState = {
-  currentInspection: null,
+const initialState: ScanState = {
+  currentScan: null,
   isLoading: false,
   error: null,
 };
@@ -17,11 +17,11 @@ export const inspectionSlice = createSlice({
   name: 'inspection',
   initialState,
   reducers: {
-    setCurrentInspection(state, action: { payload: Inspection }) {
-      state.currentInspection = action.payload;
+    setCurrentScan(state, action: { payload: Scan }) {
+      state.currentScan = action.payload;
     },
-    clearCurrentInspection(state) {
-      state.currentInspection = null;
+    clearCurrentScan(state) {
+      state.currentScan = null;
     },
     setLoading(state, action: { payload: boolean }) {
       state.isLoading = action.payload;
@@ -32,5 +32,5 @@ export const inspectionSlice = createSlice({
   },
 });
 
-export const { setCurrentInspection, clearCurrentInspection, setLoading, setError } =
+export const { setCurrentScan, clearCurrentScan, setLoading, setError } =
   inspectionSlice.actions;

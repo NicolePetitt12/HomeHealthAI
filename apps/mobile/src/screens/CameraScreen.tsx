@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button } from 'react-native-paper';
-import type { RootStackScreenProps } from '../navigation/types';
+import type { MainStackScreenProps } from '../navigation/types';
 
-export function CameraScreen({ navigation }: RootStackScreenProps<'Camera'>) {
+export function CameraScreen({ navigation }: MainStackScreenProps<'Camera'>) {
   return (
     <View style={styles.container}>
       <Text variant="headlineSmall">Camera</Text>

@@ -4,6 +4,8 @@ import { Text, TextInput, Button } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/types';
 import { useAuth } from '../hooks/useAuth';
+import { GnomeAvatar } from '../components';
+import { spacing, radii } from '../theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -33,9 +35,13 @@ export function LoginScreen({ navigation }: Props) {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        style={styles.scroll}
+      >
         <View style={styles.header}>
-          <Text style={styles.logo}>🔍</Text>
+          <GnomeAvatar state="idle" size={96} />
           <Text variant="headlineMedium" style={styles.title}>Sign In</Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
             Welcome back to Inspector Gnome
@@ -51,6 +57,8 @@ export function LoginScreen({ navigation }: Props) {
             autoCapitalize="none"
             autoComplete="email"
             mode="outlined"
+            textColor="#FFFFFF"
+            style={styles.input}
           />
           <TextInput
             label="Password"
@@ -59,6 +67,8 @@ export function LoginScreen({ navigation }: Props) {
             secureTextEntry={!showPassword}
             autoComplete="password"
             mode="outlined"
+            textColor="#FFFFFF"
+            style={styles.input}
             right={
               <TextInput.Icon
                 icon={showPassword ? 'eye-off' : 'eye'}
@@ -67,15 +77,14 @@ export function LoginScreen({ navigation }: Props) {
             }
           />
 
-          {error && (
-            <Text style={styles.error}>{error}</Text>
-          )}
+          {error && <Text style={styles.error}>{error}</Text>}
 
           <Button
             mode="contained"
             onPress={handleSignIn}
             loading={isLoading}
             disabled={isLoading || !email.trim() || !password}
+            buttonColor="#2E7D32"
             contentStyle={styles.buttonContent}
           >
             Sign In
@@ -85,6 +94,7 @@ export function LoginScreen({ navigation }: Props) {
             mode="text"
             onPress={() => navigation.navigate('Register')}
             disabled={isLoading}
+            textColor="#2E7D32"
           >
             Don't have an account? Create one
           </Button>
@@ -97,34 +107,40 @@ export function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
+    backgroundColor: '#121212',
+  },
+  scroll: {
+    backgroundColor: '#121212',
   },
   container: {
     flexGrow: 1,
-    padding: 32,
+    padding: spacing.xxxl,
     justifyContent: 'center',
-    gap: 32,
+    gap: spacing.xxxl,
   },
   header: {
     alignItems: 'center',
-    gap: 8,
-  },
-  logo: {
-    fontSize: 56,
+    gap: spacing.sm,
   },
   title: {
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginTop: spacing.sm,
   },
   subtitle: {
-    opacity: 0.6,
+    color: '#B0B0B0',
   },
   form: {
-    gap: 16,
+    gap: spacing.lg,
+  },
+  input: {
+    backgroundColor: '#1E1E1E',
   },
   error: {
-    color: '#B00020',
+    color: '#FF6B6B',
     textAlign: 'center',
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
 });

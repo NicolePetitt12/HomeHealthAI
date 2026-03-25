@@ -5,10 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { AuthNavigator } from './AuthNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
-import { HomeScreen } from '../screens/HomeScreen';
-import { CameraScreen } from '../screens/CameraScreen';
+import { MainTabNavigator } from './MainTabNavigator';
 import { ResultsScreen } from '../screens/ResultsScreen';
-import { HistoryScreen } from '../screens/HistoryScreen';
+import { FindAProScreen } from '../screens/FindAProScreen';
+import { CameraScreen } from '../screens/CameraScreen';
 import type { RootStackParamList, MainStackParamList } from './types';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
@@ -16,11 +16,23 @@ const Main = createNativeStackNavigator<MainStackParamList>();
 
 function MainNavigator() {
   return (
-    <Main.Navigator initialRouteName="Home">
-      <Main.Screen name="Home" component={HomeScreen} options={{ title: 'Inspector Gnome' }} />
-      <Main.Screen name="Camera" component={CameraScreen} options={{ title: 'New Inspection' }} />
-      <Main.Screen name="Results" component={ResultsScreen} options={{ title: 'Results' }} />
-      <Main.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
+    <Main.Navigator screenOptions={{ headerShown: false }}>
+      <Main.Screen name="Tabs" component={MainTabNavigator} />
+      <Main.Screen
+        name="Camera"
+        component={CameraScreen}
+        options={{ presentation: 'fullScreenModal' }}
+      />
+      <Main.Screen
+        name="Results"
+        component={ResultsScreen}
+        options={{ headerShown: true, title: 'Analysis Results', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+      />
+      <Main.Screen
+        name="FindAPro"
+        component={FindAProScreen}
+        options={{ headerShown: true, title: 'Find a Pro', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+      />
     </Main.Navigator>
   );
 }
@@ -31,8 +43,8 @@ export function RootNavigator() {
 
   if (isLoading || hasOnboarded === null) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#121212' }}>
+        <ActivityIndicator size="large" color="#2E7D32" />
       </View>
     );
   }

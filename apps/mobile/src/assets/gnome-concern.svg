@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Hat (amber/orange tint for concern) -->
+  <polygon points="100,20 60,90 140,90" fill="#E65100"/>
+  <ellipse cx="100" cy="90" rx="42" ry="10" fill="#BF360C"/>
+  <rect x="62" y="83" width="76" height="12" rx="6" fill="#FF6D00"/>
+  <!-- Warning symbol on hat -->
+  <text x="100" y="70" text-anchor="middle" font-size="18" fill="#FFCC80">!</text>
+  <!-- Face -->
+  <ellipse cx="100" cy="115" rx="28" ry="26" fill="#FFCC80"/>
+  <!-- Worried eyes -->
+  <ellipse cx="90" cy="110" rx="4" ry="5" fill="#4E342E"/>
+  <ellipse cx="110" cy="110" rx="4" ry="5" fill="#4E342E"/>
+  <circle cx="92" cy="108" r="1.5" fill="#FFFFFF"/>
+  <circle cx="112" cy="108" r="1.5" fill="#FFFFFF"/>
+  <!-- Worried brows -->
+  <path d="M84 103 Q89 107 94 103" stroke="#795548" stroke-width="2.5" fill="none"/>
+  <path d="M106 103 Q111 107 116 103" stroke="#795548" stroke-width="2.5" fill="none"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="117" rx="5" ry="4" fill="#FFAB40"/>
+  <!-- Worried mouth (down-turned) -->
+  <path d="M89 129 Q100 123 111 129" stroke="#795548" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Sweat drop -->
+  <path d="M118 105 Q120 110 118 113 Q115 110 118 105" fill="#81D4FA"/>
+  <!-- Beard -->
+  <path d="M76 130 Q78 148 100 152 Q122 148 124 130" fill="#FAFAFA"/>
+  <!-- Body (orange tint) -->
+  <rect x="72" y="148" width="56" height="36" rx="10" fill="#E65100"/>
+  <!-- Arms (raised in concern) -->
+  <path d="M72 158 L55 143" stroke="#EF6C00" stroke-width="14" stroke-linecap="round"/>
+  <path d="M128 158 L145 143" stroke="#EF6C00" stroke-width="14" stroke-linecap="round"/>
+  <!-- Hands -->
+  <circle cx="51" cy="140" r="8" fill="#FFCC80"/>
+  <circle cx="149" cy="140" r="8" fill="#FFCC80"/>
+  <!-- Belt -->
+  <rect x="72" y="165" width="56" height="8" rx="4" fill="#BF360C"/>
+  <rect x="96" y="163" width="8" height="12" rx="2" fill="#FFA000"/>
+  <!-- Legs -->
+  <rect x="78" y="182" width="18" height="20" rx="6" fill="#BF360C"/>
+  <rect x="104" y="182" width="18" height="20" rx="6" fill="#BF360C"/>
+  <!-- Boots -->
+  <ellipse cx="87" cy="200" rx="12" ry="6" fill="#4E342E"/>
+  <ellipse cx="113" cy="200" rx="12" ry="6" fill="#4E342E"/>
+</svg>

@@ -21,7 +21,7 @@ export default function App() {
             <PaperProvider theme={theme}>
               <NavigationContainer>
                 <RootNavigator />
-                <StatusBar style="auto" />
+                <StatusBar style="light" />
               </NavigationContainer>
             </PaperProvider>
           </QueryClientProvider>

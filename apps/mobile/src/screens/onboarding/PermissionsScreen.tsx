@@ -5,6 +5,8 @@ import { useCameraPermissions } from 'expo-camera';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
 import { useOnboarding } from '../../contexts/OnboardingContext';
+import { GnomeAvatar } from '../../components';
+import { spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Permissions'>;
 
@@ -26,10 +28,8 @@ export function PermissionsScreen(_: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.icon}>📷</Text>
-        <Text variant="headlineMedium" style={styles.title}>
-          Camera Access
-        </Text>
+        <GnomeAvatar state="analyzing" size={110} />
+        <Text variant="headlineMedium" style={styles.title}>Camera Access</Text>
         <Text variant="bodyLarge" style={styles.body}>
           Inspector Gnome needs access to your camera to photograph areas you want
           analyzed. Your photos are processed securely and never shared without your
@@ -46,6 +46,7 @@ export function PermissionsScreen(_: Props) {
         {!granted && (
           <Button
             mode="contained"
+            buttonColor="#2E7D32"
             onPress={handleAllow}
             style={styles.button}
             contentStyle={styles.buttonContent}
@@ -55,8 +56,10 @@ export function PermissionsScreen(_: Props) {
         )}
         <Button
           mode={granted ? 'contained' : 'outlined'}
+          buttonColor={granted ? '#2E7D32' : undefined}
+          textColor={granted ? '#FFFFFF' : '#2E7D32'}
           onPress={finish}
-          style={styles.button}
+          style={[styles.button, !granted && styles.outlinedButton]}
           contentStyle={styles.buttonContent}
         >
           {granted ? 'Continue' : 'Skip for Now'}
@@ -69,36 +72,39 @@ export function PermissionsScreen(_: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 32,
+    backgroundColor: '#121212',
+    padding: spacing.xxxl,
     justifyContent: 'space-between',
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
-  },
-  icon: {
-    fontSize: 72,
+    gap: spacing.xxl,
   },
   title: {
+    color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   body: {
+    color: '#B0B0B0',
     textAlign: 'center',
-    opacity: 0.7,
+    lineHeight: 24,
   },
   granted: {
-    color: '#2E7D32',
+    color: '#81C784',
   },
   actions: {
-    gap: 12,
+    gap: spacing.md,
   },
   button: {
     width: '100%',
   },
+  outlinedButton: {
+    borderColor: '#2E7D32',
+  },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
 });

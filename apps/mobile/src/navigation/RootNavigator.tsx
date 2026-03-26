@@ -9,6 +9,7 @@ import { MainTabNavigator } from './MainTabNavigator';
 import { ResultsScreen } from '../screens/ResultsScreen';
 import { FindAProScreen } from '../screens/FindAProScreen';
 import { CameraScreen } from '../screens/CameraScreen';
+import { PhotoReviewScreen } from '../screens/PhotoReviewScreen';
 import type { RootStackParamList, MainStackParamList } from './types';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
@@ -32,6 +33,11 @@ function MainNavigator() {
         name="FindAPro"
         component={FindAProScreen}
         options={{ headerShown: true, title: 'Find a Pro', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+      />
+      <Main.Screen
+        name="PhotoReview"
+        component={PhotoReviewScreen}
+        options={{ headerShown: true, title: 'Review Photo', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
       />
     </Main.Navigator>
   );

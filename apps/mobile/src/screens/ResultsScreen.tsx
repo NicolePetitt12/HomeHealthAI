@@ -1,17 +1,18 @@
-import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import { ScreenContainer, RiskBadge, ConfidenceBar, GnomeAvatar } from '../components';
 import { spacing, radii } from '../theme';
+import { useAppSelector } from '../store/hooks';
+import { supabase } from '../services/supabase';
 import type { MainStackScreenProps } from '../navigation/types';
 import type { RiskLevel } from '@inspector-gnome/shared';
 import type { GnomeState } from '../components';
 
 type Props = MainStackScreenProps<'Results'>;
 
-// Mock data — will be replaced with React Query
-const MOCK_RESULT = {
-  location: 'Basement - West Wall',
+// TODO: Replace with real AI analysis data from backend pipeline
+const MOCK_ANALYSIS = {
   riskLevel: 'moderate' as RiskLevel,
   confidence: 87,
   explanation:
@@ -23,40 +24,64 @@ function gnomeStateForRisk(risk: RiskLevel): GnomeState {
 }
 
 export function ResultsScreen({ navigation, route }: Props) {
-  const result = MOCK_RESULT;
-  const gnomeState = gnomeStateForRisk(result.riskLevel);
-  const showFindPro = result.riskLevel === 'moderate' || result.riskLevel === 'high';
+  const { inspectionId } = route.params;
+  const currentScan = useAppSelector((s) => s.inspection.currentScan);
+  const scan = currentScan?.id === inspectionId ? currentScan : null;
+
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!scan?.imagePath) return;
+    supabase.storage
+      .from('scan-images')
+      .createSignedUrl(scan.imagePath, 3600)
+      .then(({ data }) => {
+        if (data?.signedUrl) setImageUri(data.signedUrl);
+      });
+  }, [scan?.imagePath]);
+
+  const analysis = MOCK_ANALYSIS;
+  const gnomeState = gnomeStateForRisk(analysis.riskLevel);
+  const showFindPro = analysis.riskLevel === 'moderate' || analysis.riskLevel === 'high';
 
   return (
     <ScreenContainer>
-      <Image
-        source={{ uri: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      {imageUri ? (
+        <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
+      ) : (
+        <View style={[styles.image, styles.imagePlaceholder]}>
+          <ActivityIndicator color="#2E7D32" />
+        </View>
+      )}
 
-      <Text variant="labelSmall" style={styles.scanned}>
-        Scanned: {result.location}
-      </Text>
+      <Text variant="labelSmall" style={styles.metaLabel}>Location</Text>
+      <Text variant="bodySmall" style={styles.metaValue}>{scan?.location ?? 'Unknown location'}</Text>
+
+      {scan?.notes ? (
+        <>
+          <Text variant="labelSmall" style={[styles.metaLabel, { marginTop: spacing.sm }]}>Notes</Text>
+          <Text variant="bodySmall" style={styles.metaValue}>{scan.notes}</Text>
+        </>
+      ) : null}
 
       <View style={styles.riskRow}>
         <View>
           <Text variant="labelMedium" style={styles.label}>Overall Risk Level</Text>
           <View style={styles.riskBadgeRow}>
-            <RiskBadge level={result.riskLevel} />
-            <Text variant="headlineSmall" style={styles.pct}>{result.confidence}%</Text>
+            <RiskBadge level={analysis.riskLevel} />
+            <Text variant="headlineSmall" style={styles.pct}>{analysis.confidence}%</Text>
           </View>
         </View>
       </View>
 
-      <ConfidenceBar percentage={result.confidence} />
+      <ConfidenceBar percentage={analysis.confidence} />
 
       <View style={styles.gnomeSection}>
         <View style={styles.gnomeRow}>
           <GnomeAvatar state={gnomeState} size={64} />
           <View style={styles.bubble}>
             <Text variant="labelSmall" style={styles.gnomeName}>Inspector Gnome</Text>
-            <Text variant="bodySmall" style={styles.explanation}>{result.explanation}</Text>
+            <Text variant="bodySmall" style={styles.explanation}>{analysis.explanation}</Text>
           </View>
         </View>
       </View>
@@ -83,8 +108,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginTop: spacing.sm,
   },
-  scanned: {
-    color: '#B0B0B0',
+  imagePlaceholder: {
+    backgroundColor: '#1A1A1A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  metaLabel: {
+    color: '#888888',
+    marginBottom: 2,
+  },
+  metaValue: {
+    color: '#E0E0E0',
     marginBottom: spacing.lg,
   },
   riskRow: {

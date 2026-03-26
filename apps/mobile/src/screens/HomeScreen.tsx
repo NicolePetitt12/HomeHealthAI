@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { Text } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -29,13 +29,21 @@ const MOCK_INSPECTIONS: Array<{
 
 export function HomeScreen({ navigation }: Props) {
   async function handleUpload() {
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Required',
+        'Inspector Gnome needs access to your photos to upload images.',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       quality: 0.8,
     });
-    if (!result.canceled) {
-      navigation.navigate('Camera');
+    if (!result.canceled && result.assets[0]) {
+      navigation.navigate('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery' });
     }
   }
 

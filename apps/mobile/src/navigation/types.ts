@@ -34,6 +34,7 @@ export type MainStackParamList = {
   Results: { inspectionId: string };
   FindAPro: { scanId?: string };
   Camera: undefined;
+  PhotoReview: { imageUri: string; source: 'camera' | 'gallery' };
 };
 
 // ─── Root ────────────────────────────────────────────────────────────────────

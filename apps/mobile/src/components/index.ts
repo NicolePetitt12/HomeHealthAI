@@ -12,4 +12,6 @@ export { ConfidenceBar } from './ConfidenceBar';
 export { GnomeAvatar } from './GnomeAvatar';
 export { ProfessionalCard } from './ProfessionalCard';
 export { CameraTabButton } from './CameraTabButton';
+export { CameraGridOverlay } from './CameraGridOverlay';
+export { ProgressOverlay } from './ProgressOverlay';
 export type { GnomeState } from './GnomeAvatar';

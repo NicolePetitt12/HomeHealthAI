@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GnomeAvatar } from '../components';
+import { GnomeAvatar, CameraGridOverlay } from '../components';
 import { spacing } from '../theme';
 import type { MainStackScreenProps } from '../navigation/types';
 
@@ -11,19 +11,19 @@ type Props = MainStackScreenProps<'Camera'>;
 
 export function CameraScreen({ navigation }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
-  const [analyzing, setAnalyzing] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
   async function handleCapture() {
-    if (!cameraRef.current || analyzing) return;
-    setAnalyzing(true);
+    if (!cameraRef.current || capturing) return;
+    setCapturing(true);
     try {
-      await cameraRef.current.takePictureAsync({ quality: 0.8 });
-      // Simulate analysis delay — will be replaced with real API call
-      await new Promise((r) => setTimeout(r, 1500));
-      navigation.replace('Results', { inspectionId: 'mock-id' });
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+      if (photo?.uri) {
+        navigation.replace('PhotoReview', { imageUri: photo.uri, source: 'camera' });
+      }
     } finally {
-      setAnalyzing(false);
+      setCapturing(false);
     }
   }
 
@@ -50,6 +50,8 @@ export function CameraScreen({ navigation }: Props) {
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing="back" />
 
+      <CameraGridOverlay showDistancePrompt={!capturing} />
+
       {/* Header — absolutely positioned over camera */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
@@ -59,23 +61,15 @@ export function CameraScreen({ navigation }: Props) {
         <View style={styles.closeBtn} />
       </View>
 
-      {/* Analyzing overlay */}
-      {analyzing && (
-        <View style={styles.overlay}>
-          <GnomeAvatar state="analyzing" size={100} />
-          <Text variant="titleMedium" style={styles.analyzingText}>Analyzing...</Text>
-        </View>
-      )}
-
       {/* Capture controls — absolutely positioned over camera */}
       <View style={styles.bottomBar}>
         <Text variant="labelSmall" style={styles.hint}>
-          Point at the area you want to inspect
+          Tap to capture
         </Text>
         <TouchableOpacity
-          style={[styles.captureBtn, analyzing && styles.captureBtnDisabled]}
+          style={[styles.captureBtn, capturing && styles.captureBtnDisabled]}
           onPress={handleCapture}
-          disabled={analyzing}
+          disabled={capturing}
         >
           <View style={styles.captureInner} />
         </TouchableOpacity>
@@ -118,16 +112,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   topTitle: {
-    color: '#FFFFFF',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.lg,
-  },
-  analyzingText: {
     color: '#FFFFFF',
   },
   bottomBar: {

@@ -8,12 +8,13 @@ interface Props {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   label: string;
   onPress: () => void;
+  iconColor?: string;
 }
 
-export function ActionCard({ icon, label, onPress }: Props) {
+export function ActionCard({ icon, label, onPress, iconColor = '#C41E3A' }: Props) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <MaterialCommunityIcons name={icon} size={28} color="#2E7D32" />
+      <MaterialCommunityIcons name={icon} size={28} color={iconColor} />
       <Text variant="labelLarge" style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
@@ -22,7 +23,7 @@ export function ActionCard({ icon, label, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.lg,
     padding: spacing.xl,
     alignItems: 'center',

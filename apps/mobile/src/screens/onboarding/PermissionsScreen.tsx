@@ -5,7 +5,7 @@ import { useCameraPermissions } from 'expo-camera';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
 import { useOnboarding } from '../../contexts/OnboardingContext';
-import { GnomeAvatar } from '../../components';
+import { GnomeAvatar, AppBackground } from '../../components';
 import { spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Permissions'>;
@@ -26,6 +26,7 @@ export function PermissionsScreen(_: Props) {
   const granted = permission?.granted ?? false;
 
   return (
+    <AppBackground>
     <View style={styles.container}>
       <View style={styles.content}>
         <GnomeAvatar state="analyzing" size={110} />
@@ -46,7 +47,7 @@ export function PermissionsScreen(_: Props) {
         {!granted && (
           <Button
             mode="contained"
-            buttonColor="#2E7D32"
+            buttonColor="#C41E3A"
             onPress={handleAllow}
             style={styles.button}
             contentStyle={styles.buttonContent}
@@ -56,8 +57,8 @@ export function PermissionsScreen(_: Props) {
         )}
         <Button
           mode={granted ? 'contained' : 'outlined'}
-          buttonColor={granted ? '#2E7D32' : undefined}
-          textColor={granted ? '#FFFFFF' : '#2E7D32'}
+          buttonColor={granted ? '#C41E3A' : undefined}
+          textColor={granted ? '#FFFFFF' : '#C41E3A'}
           onPress={finish}
           style={[styles.button, !granted && styles.outlinedButton]}
           contentStyle={styles.buttonContent}
@@ -66,13 +67,14 @@ export function PermissionsScreen(_: Props) {
         </Button>
       </View>
     </View>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
     padding: spacing.xxxl,
     justifyContent: 'space-between',
   },
@@ -102,7 +104,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   outlinedButton: {
-    borderColor: '#2E7D32',
+    borderColor: '#C41E3A',
   },
   buttonContent: {
     paddingVertical: spacing.sm,

@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     color: '#B0B0B0',
   },
   menu: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.lg,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.xxl,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   divider: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
   },
   signOut: {
     borderColor: '#CF6679',

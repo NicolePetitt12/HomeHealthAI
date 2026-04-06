@@ -19,7 +19,7 @@ const FILTER_OPTIONS: Array<{ label: string; value: FilterValue; color?: string 
   { label: 'All', value: 'all' },
   { label: 'High', value: 'high', color: '#C62828' },
   { label: 'Moderate', value: 'moderate', color: '#E65100' },
-  { label: 'Low', value: 'low', color: '#2E7D32' },
+  { label: 'Low', value: 'low', color: '#C41E3A' },
 ];
 
 const MOCK_HISTORY: Array<{

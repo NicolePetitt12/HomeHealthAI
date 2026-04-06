@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { supabase } from '../services/supabase';
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface AuthContextValue {
   session: Session | null;
@@ -8,6 +12,7 @@ interface AuthContextValue {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signInWithProvider: (provider: 'google' | 'facebook') => Promise<void>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
 }
@@ -47,6 +52,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   }
 
+  async function signInWithProvider(provider: 'google' | 'facebook') {
+    const redirectTo = Linking.createURL('/auth/callback');
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
+    });
+    if (error) throw error;
+    if (data.url) {
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type === 'success' && result.url) {
+        const { queryParams } = Linking.parse(result.url);
+        if (queryParams?.access_token && queryParams?.refresh_token) {
+          await supabase.auth.setSession({
+            access_token: queryParams.access_token as string,
+            refresh_token: queryParams.refresh_token as string,
+          });
+        }
+      }
+    }
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -72,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, isLoading, signIn, signUp, signOut, deleteAccount }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, isLoading, signIn, signUp, signInWithProvider, signOut, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,6 +4,7 @@ import { Text, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
+import { AppBackground } from '../../components';
 import { spacing, radii } from '../../theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Features'>;
@@ -28,6 +29,7 @@ const FEATURES = [
 
 export function FeaturesScreen({ navigation }: Props) {
   return (
+    <AppBackground>
     <View style={styles.container}>
       <View style={styles.content}>
         <Text variant="headlineMedium" style={styles.title}>How It Works</Text>
@@ -35,7 +37,7 @@ export function FeaturesScreen({ navigation }: Props) {
           {FEATURES.map((feature) => (
             <View key={feature.title} style={styles.card}>
               <View style={styles.iconCircle}>
-                <MaterialCommunityIcons name={feature.icon} size={24} color="#2E7D32" />
+                <MaterialCommunityIcons name={feature.icon} size={24} color="#C41E3A" />
               </View>
               <View style={styles.cardText}>
                 <Text variant="titleSmall" style={styles.featureTitle}>{feature.title}</Text>
@@ -47,7 +49,7 @@ export function FeaturesScreen({ navigation }: Props) {
       </View>
       <Button
         mode="contained"
-        buttonColor="#2E7D32"
+        buttonColor="#C41E3A"
         onPress={() => navigation.navigate('Permissions')}
         style={styles.button}
         contentStyle={styles.buttonContent}
@@ -55,13 +57,14 @@ export function FeaturesScreen({ navigation }: Props) {
         Next
       </Button>
     </View>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
     padding: spacing.xxxl,
     justifyContent: 'space-between',
   },
@@ -82,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     padding: spacing.lg,
   },
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1B5E20',
+    backgroundColor: '#7F0000',
     alignItems: 'center',
     justifyContent: 'center',
   },

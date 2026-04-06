@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     padding: spacing.lg,
     marginBottom: spacing.sm,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   viewDetails: {
-    color: '#2E7D32',
+    color: '#C41E3A',
     marginTop: spacing.xs,
   },
 });

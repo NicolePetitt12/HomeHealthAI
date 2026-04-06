@@ -16,7 +16,7 @@ export function ConfidenceBar({ percentage, label = 'Analysis Confidence' }: Pro
         <Text variant="labelMedium" style={styles.label}>{label}</Text>
         <Text variant="labelMedium" style={styles.pct}>{Math.round(percentage)}% Match</Text>
       </View>
-      <ProgressBar progress={value} color="#2E7D32" style={styles.bar} />
+      <ProgressBar progress={value} color="#C41E3A" style={styles.bar} />
     </View>
   );
 }
@@ -33,12 +33,12 @@ const styles = StyleSheet.create({
     color: '#B0B0B0',
   },
   pct: {
-    color: '#2E7D32',
+    color: '#C41E3A',
     fontWeight: '600',
   },
   bar: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
   },
 });

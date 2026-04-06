@@ -14,7 +14,7 @@ export function GnomeTip({ text }: Props) {
       <View style={styles.accent} />
       <View style={styles.content}>
         <View style={styles.header}>
-          <MaterialCommunityIcons name="lightbulb-outline" size={16} color="#2E7D32" />
+          <MaterialCommunityIcons name="lightbulb-outline" size={16} color="#C41E3A" />
           <Text variant="labelMedium" style={styles.label}>Gnome Tip</Text>
         </View>
         <Text variant="bodySmall" style={styles.text}>{text}</Text>
@@ -26,13 +26,13 @@ export function GnomeTip({ text }: Props) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     overflow: 'hidden',
   },
   accent: {
     width: 4,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
   },
   content: {
     flex: 1,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   label: {
-    color: '#2E7D32',
+    color: '#C41E3A',
     fontWeight: '600',
   },
   text: {

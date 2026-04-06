@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GnomeAvatar, CameraGridOverlay } from '../components';
+import { GnomeAvatar, CameraGridOverlay, AppBackground } from '../components';
 import { spacing } from '../theme';
 import type { MainStackScreenProps } from '../navigation/types';
 
@@ -28,21 +28,23 @@ export function CameraScreen({ navigation }: Props) {
   }
 
   if (!permission) {
-    return <View style={styles.container} />;
+    return <AppBackground><View style={styles.container} /></AppBackground>;
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
-        <GnomeAvatar state="idle" size={100} />
-        <Text variant="titleMedium" style={styles.permText}>Camera access needed</Text>
-        <Text variant="bodySmall" style={styles.permSub}>
-          Inspector Gnome needs your camera to scan areas for mold and moisture.
-        </Text>
-        <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
-          <Text variant="labelLarge" style={styles.permBtnText}>Allow Camera</Text>
-        </TouchableOpacity>
-      </View>
+      <AppBackground>
+        <View style={styles.container}>
+          <GnomeAvatar state="idle" size={100} />
+          <Text variant="titleMedium" style={styles.permText}>Camera access needed</Text>
+          <Text variant="bodySmall" style={styles.permSub}>
+            Inspector Gnome needs your camera to scan areas for mold and moisture.
+          </Text>
+          <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
+            <Text variant="labelLarge" style={styles.permBtnText}>Allow Camera</Text>
+          </TouchableOpacity>
+        </View>
+      </AppBackground>
     );
   }
 
@@ -81,7 +83,7 @@ export function CameraScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: '#0D0807',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.lg,
@@ -155,7 +157,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   permBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
     borderRadius: 12,
     paddingHorizontal: 32,
     paddingVertical: 14,

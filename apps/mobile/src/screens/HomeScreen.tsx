@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import {
   ScreenContainer,
@@ -10,7 +11,8 @@ import {
   InspectionListItem,
   GnomeTip,
 } from '../components';
-import { spacing } from '../theme';
+import { spacing, radii } from '../theme';
+import { useMoldStatusCounts } from '../hooks/useMoldStatusCounts';
 import type { MainTabScreenProps } from '../navigation/types';
 import type { RiskLevel } from '@inspector-gnome/shared';
 
@@ -23,9 +25,59 @@ const MOCK_INSPECTIONS: Array<{
   riskLevel: RiskLevel;
   status: string;
 }> = [
-  { id: '1', location: 'Basement - West Wall', date: 'Oct 24, 2025', riskLevel: 'moderate', status: 'Review Recommended' },
-  { id: '2', location: 'Master Bathroom', date: 'Oct 22, 2025', riskLevel: 'low', status: 'Monitoring' },
+  {
+    id: '1',
+    location: 'Basement - West Wall',
+    date: 'Oct 24, 2025',
+    riskLevel: 'moderate',
+    status: 'Review Recommended',
+  },
+  {
+    id: '2',
+    location: 'Master Bathroom',
+    date: 'Oct 22, 2025',
+    riskLevel: 'low',
+    status: 'Monitoring',
+  },
 ];
+
+function MoldStatusSection() {
+  const { data } = useMoldStatusCounts();
+  const likely = data?.likelyMold ?? 0;
+  const notSure = data?.notSure ?? 0;
+  const unlikely = data?.unlikelyMold ?? 0;
+
+  return (
+    <View style={moldStyles.container}>
+      <Text variant="titleMedium" style={moldStyles.title}>
+        Mold Status
+      </Text>
+
+      {/* Top row */}
+      <View style={moldStyles.row}>
+        <View style={[moldStyles.cell, moldStyles.likelyCell]}>
+          <Text style={moldStyles.likelyLabel}>Likely Mold</Text>
+          <View style={moldStyles.likelyRight}>
+            <MaterialCommunityIcons name="alert" size={16} color="#FFFFFF" />
+            <Text style={moldStyles.likelyCount}>{likely}</Text>
+          </View>
+        </View>
+        <View style={[moldStyles.cell, moldStyles.darkCell]}>
+          <Text style={moldStyles.cellLabel}>Not Sure</Text>
+          <Text style={moldStyles.cellCount}>{notSure}</Text>
+        </View>
+      </View>
+
+      {/* Bottom row */}
+      <View style={moldStyles.row}>
+        <View style={[moldStyles.cell, moldStyles.darkCell, moldStyles.fullCell]}>
+          <Text style={moldStyles.cellLabel}>Unlikely Mold</Text>
+          <Text style={[moldStyles.cellCount, moldStyles.greenCount]}>{unlikely}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export function HomeScreen({ navigation }: Props) {
   async function handleUpload() {
@@ -62,19 +114,32 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>Inspector Gnome</Text>
-        <Text variant="bodySmall" style={styles.subtitle}>Home Health Assistant</Text>
+        <Text variant="headlineMedium" style={styles.title}>
+          Dashboard
+        </Text>
+        <Text variant="bodySmall" style={styles.subtitle}>
+          Home Health Assistant
+        </Text>
       </View>
 
-      <HeroCard
-        title="Protect Your Home"
-        subtitle="Scan for mold and moisture risks instantly"
-      />
+      <HeroCard title="Protect Your Home" subtitle="Scan for mold and moisture risks instantly" />
 
       <View style={styles.actions}>
         <ActionCard icon="camera" label="Take Photo" onPress={handleCamera} />
         <ActionCard icon="upload" label="Upload" onPress={handleUpload} />
       </View>
+
+      <View style={[styles.actions, styles.actionsSecondary]}>
+        <ActionCard
+          icon="clipboard-list-outline"
+          label="Scan History"
+          onPress={handleViewAll}
+          iconColor="#FFFFFF"
+        />
+        <ActionCard icon="information" label="Learn More" onPress={() => {}} iconColor="#B0B0B0" />
+      </View>
+
+      <MoldStatusSection />
 
       <SectionHeader title="Recent Inspections" actionLabel="View All" onAction={handleViewAll} />
 
@@ -115,7 +180,71 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.xxl,
   },
+  actionsSecondary: {
+    marginTop: -spacing.lg,
+  },
   tip: {
     marginTop: spacing.xl,
+  },
+});
+
+const moldStyles = StyleSheet.create({
+  container: {
+    marginBottom: spacing.xxl,
+    gap: spacing.sm,
+  },
+  title: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  cell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: radii.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  likelyCell: {
+    backgroundColor: '#C41E3A',
+  },
+  darkCell: {
+    backgroundColor: '#1C1212',
+  },
+  fullCell: {
+    flex: 1,
+  },
+  likelyLabel: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  likelyRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  likelyCount: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  cellLabel: {
+    color: '#B0B0B0',
+    fontSize: 14,
+  },
+  cellCount: {
+    color: '#B0B0B0',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  greenCount: {
+    color: '#81C784',
   },
 });

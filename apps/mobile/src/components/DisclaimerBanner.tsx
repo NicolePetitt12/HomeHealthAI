@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     borderRadius: radii.md,
     padding: spacing.md,
     gap: spacing.sm,

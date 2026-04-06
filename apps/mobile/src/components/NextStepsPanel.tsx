@@ -16,7 +16,7 @@ export function NextStepsPanel({ steps }: Props) {
           <MaterialCommunityIcons
             name="checkbox-marked-circle-outline"
             size={18}
-            color="#2E7D32"
+            color="#C41E3A"
             style={styles.icon}
           />
           <Text variant="bodySmall" style={styles.text}>{step}</Text>
@@ -28,7 +28,7 @@ export function NextStepsPanel({ steps }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     padding: spacing.lg,
     gap: spacing.md,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Image, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
-import { GnomeTip, ProgressOverlay } from '../components';
+import { GnomeTip, ProgressOverlay, AppBackground } from '../components';
 import { useSubmitScan } from '../hooks/useSubmitScan';
 import { spacing } from '../theme';
 import type { MainStackScreenProps } from '../navigation/types';
@@ -46,7 +46,7 @@ export function PhotoReviewScreen({ route, navigation }: Props) {
   }
 
   return (
-    <>
+    <AppBackground>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -73,9 +73,9 @@ export function PhotoReviewScreen({ route, navigation }: Props) {
             textColor="#FFFFFF"
             placeholderTextColor="#888"
             outlineColor="#333"
-            activeOutlineColor="#2E7D32"
+            activeOutlineColor="#C41E3A"
             style={styles.input}
-            theme={{ colors: { background: '#1E1E1E', onSurfaceVariant: '#B0B0B0' } }}
+            theme={{ colors: { background: '#1C1212', onSurfaceVariant: '#B0B0B0' } }}
           />
 
           <TextInput
@@ -89,9 +89,9 @@ export function PhotoReviewScreen({ route, navigation }: Props) {
             textColor="#FFFFFF"
             placeholderTextColor="#888"
             outlineColor="#333"
-            activeOutlineColor="#2E7D32"
+            activeOutlineColor="#C41E3A"
             style={[styles.input, styles.notesInput]}
-            theme={{ colors: { background: '#1E1E1E', onSurfaceVariant: '#B0B0B0' } }}
+            theme={{ colors: { background: '#1C1212', onSurfaceVariant: '#B0B0B0' } }}
           />
 
           <GnomeTip text="Describe where this photo was taken so you can find it later." />
@@ -113,14 +113,14 @@ export function PhotoReviewScreen({ route, navigation }: Props) {
       </ScrollView>
 
       <ProgressOverlay visible={progressVisible} stage={stage} percent={percent} />
-    </>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
   },
   content: {
     paddingBottom: 40,
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   input: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
   },
   notesInput: {
     minHeight: 80,
   },
   submitBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

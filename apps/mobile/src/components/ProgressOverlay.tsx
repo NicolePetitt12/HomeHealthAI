@@ -53,12 +53,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
     borderRadius: 3,
   },
   pct: {

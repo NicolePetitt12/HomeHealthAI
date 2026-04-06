@@ -31,7 +31,7 @@ export function FilterChipRow({ options, selected, onSelect }: Props) {
             onPress={() => onSelect(opt.value)}
             style={[
               styles.chip,
-              isSelected && { backgroundColor: opt.color ?? '#2E7D32' },
+              isSelected && { backgroundColor: opt.color ?? '#C41E3A' },
             ]}
             textStyle={[
               styles.chipText,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   chip: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
   },
   chipText: {
     color: '#B0B0B0',

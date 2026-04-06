@@ -84,7 +84,7 @@ export function ResultsScreen({ navigation, route }: Props) {
         <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
       ) : (
         <View style={[styles.image, styles.imagePlaceholder]}>
-          <ActivityIndicator color="#2E7D32" />
+          <ActivityIndicator color="#C41E3A" />
         </View>
       )}
 
@@ -107,7 +107,7 @@ export function ResultsScreen({ navigation, route }: Props) {
             <Text variant="bodySmall" style={styles.processingText}>
               Inspector Gnome is reviewing the image. This usually takes a few seconds.
             </Text>
-            <ActivityIndicator color="#2E7D32" style={{ marginTop: spacing.md }} />
+            <ActivityIndicator color="#C41E3A" style={{ marginTop: spacing.md }} />
           </View>
         </View>
       ) : (
@@ -179,7 +179,7 @@ export function ResultsScreen({ navigation, route }: Props) {
                 </Text>
                 <Button
                   mode="contained"
-                  buttonColor="#2E7D32"
+                  buttonColor="#C41E3A"
                   onPress={() => navigation.navigate('FindAPro', {})}
                   contentStyle={styles.btnContent}
                   style={styles.btn}
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   processingCard: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.lg,
     padding: spacing.xxl,
     alignItems: 'center',
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   findingsCard: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     overflow: 'hidden',
   },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   findingDivider: {
     borderTopWidth: 1,
-    borderTopColor: '#2A2A2A',
+    borderTopColor: '#2A1A1A',
   },
   findingLeft: {
     width: 16,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   proCard: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     padding: spacing.lg,
     gap: spacing.lg,

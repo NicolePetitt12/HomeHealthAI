@@ -25,7 +25,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search locations
 
 const styles = StyleSheet.create({
   bar: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     borderRadius: radii.lg,
     elevation: 0,
   },

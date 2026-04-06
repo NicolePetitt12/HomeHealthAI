@@ -3,13 +3,14 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
-import { GnomeAvatar } from '../../components';
+import { GnomeAvatar, AppBackground } from '../../components';
 import { spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
 
 export function WelcomeScreen({ navigation }: Props) {
   return (
+    <AppBackground>
     <View style={styles.container}>
       <View style={styles.content}>
         <GnomeAvatar state="idle" size={120} />
@@ -23,7 +24,7 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
       <Button
         mode="contained"
-        buttonColor="#2E7D32"
+        buttonColor="#C41E3A"
         onPress={() => navigation.navigate('Features')}
         style={styles.button}
         contentStyle={styles.buttonContent}
@@ -31,13 +32,14 @@ export function WelcomeScreen({ navigation }: Props) {
         Get Started
       </Button>
     </View>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
     padding: spacing.xxxl,
     justifyContent: 'space-between',
   },

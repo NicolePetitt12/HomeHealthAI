@@ -13,7 +13,7 @@ interface Props {
 export function HeroCard({ title, subtitle }: Props) {
   return (
     <LinearGradient
-      colors={['#1B5E20', '#2E7D32', '#388E3C']}
+      colors={['#7F0000', '#C41E3A', '#D32F2F']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.card}

@@ -34,6 +34,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   action: {
-    color: '#2E7D32',
+    color: '#C41E3A',
   },
 });

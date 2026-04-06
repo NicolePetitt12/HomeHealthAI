@@ -11,7 +11,7 @@ import {
 import { Text, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Markdown from '@ronradtke/react-native-markdown-display';
-import { GnomeAvatar } from '../components';
+import { GnomeAvatar, AppBackground } from '../components';
 import { useLegalConsent } from '../contexts/LegalConsentContext';
 import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
 import { TERMS_OF_SERVICE_MD } from '../content/termsOfService';
@@ -47,6 +47,7 @@ export function LegalConsentScreen() {
   }
 
   return (
+    <AppBackground>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <GnomeAvatar state="idle" size={72} />
@@ -113,20 +114,21 @@ export function LegalConsentScreen() {
         onPress={handleAccept}
         disabled={!accepted || isLoading}
         loading={isLoading}
-        buttonColor="#2E7D32"
+        buttonColor="#C41E3A"
         contentStyle={styles.btnContent}
         style={styles.btn}
       >
         Accept & Continue
       </Button>
     </ScrollView>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
   },
   content: {
     padding: spacing.xl,
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingVertical: spacing.lg,
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.md,
     paddingHorizontal: spacing.lg,
   },
@@ -182,14 +184,14 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#2E7D32',
+    borderColor: '#C41E3A',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
     flexShrink: 0,
   },
   checkboxChecked: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#C41E3A',
   },
   checkLabel: {
     flex: 1,
@@ -241,10 +243,10 @@ const markdownStyles = {
     fontWeight: '700' as const,
   },
   link: {
-    color: '#2E7D32',
+    color: '#C41E3A',
   },
   hr: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     height: 1,
     marginVertical: spacing.md,
   },

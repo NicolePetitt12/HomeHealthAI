@@ -10,7 +10,7 @@ import type { MainTabParamList } from './types';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const TAB_BAR_BG = '#1A1A1A';
-const ACTIVE = '#2E7D32';
+const ACTIVE = '#C41E3A';
 const INACTIVE = '#888888';
 
 export function MainTabNavigator() {
@@ -20,7 +20,7 @@ export function MainTabNavigator() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: TAB_BAR_BG,
-          borderTopColor: '#2A2A2A',
+          borderTopColor: '#2A1A1A',
           borderTopWidth: 1,
           height: 64,
           paddingBottom: 8,

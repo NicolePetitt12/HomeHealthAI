@@ -1,4 +1,5 @@
 export { ScreenContainer } from './ScreenContainer';
+export { AppBackground } from './AppBackground';
 export { RiskBadge } from './RiskBadge';
 export { RiskDot } from './RiskDot';
 export { SectionHeader } from './SectionHeader';

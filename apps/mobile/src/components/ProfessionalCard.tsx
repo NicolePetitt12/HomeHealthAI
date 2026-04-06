@@ -31,13 +31,13 @@ export function ProfessionalCard({ professional, rating, distance, tags, onBook 
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <MaterialCommunityIcons name="account-circle" size={48} color="#2E7D32" />
+          <MaterialCommunityIcons name="account-circle" size={48} color="#C41E3A" />
         </View>
         <View style={styles.info}>
           <View style={styles.nameRow}>
             <Text variant="titleSmall" style={styles.name}>{professional.businessName}</Text>
             {professional.isVerified && (
-              <MaterialCommunityIcons name="check-decagram" size={16} color="#2E7D32" />
+              <MaterialCommunityIcons name="check-decagram" size={16} color="#C41E3A" />
             )}
           </View>
           <Text variant="bodySmall" style={styles.specialty}>
@@ -76,7 +76,7 @@ export function ProfessionalCard({ professional, rating, distance, tags, onBook 
           onPress={handleCall}
           disabled={!professional.phone}
           style={styles.btn}
-          textColor="#2E7D32"
+          textColor="#C41E3A"
         >
           Call
         </Button>
@@ -84,7 +84,7 @@ export function ProfessionalCard({ professional, rating, distance, tags, onBook 
           mode="contained"
           onPress={onBook}
           style={styles.btn}
-          buttonColor="#2E7D32"
+          buttonColor="#C41E3A"
         >
           Book Now
         </Button>
@@ -95,7 +95,7 @@ export function ProfessionalCard({ professional, rating, distance, tags, onBook 
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   tag: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     borderRadius: radii.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
@@ -163,6 +163,6 @@ const styles = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    borderColor: '#2E7D32',
+    borderColor: '#C41E3A',
   },
 });

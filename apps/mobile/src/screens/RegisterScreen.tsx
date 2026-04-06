@@ -114,7 +114,7 @@ export function RegisterScreen({ navigation }: Props) {
             onPress={handleSignUp}
             loading={isLoading}
             disabled={isLoading}
-            buttonColor="#2E7D32"
+            buttonColor="#C41E3A"
             contentStyle={styles.buttonContent}
           >
             Create Account
@@ -142,7 +142,7 @@ export function RegisterScreen({ navigation }: Props) {
             mode="text"
             onPress={() => navigation.navigate('Login')}
             disabled={isLoading}
-            textColor="#2E7D32"
+            textColor="#C41E3A"
           >
             Already have an account? Sign in
           </Button>
@@ -155,10 +155,10 @@ export function RegisterScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: '#0D0807',
   },
   scroll: {
-    backgroundColor: '#121212',
+    backgroundColor: '#0D0807',
   },
   container: {
     flexGrow: 1,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   input: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
   },
   error: {
     color: '#FF6B6B',
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   legalLink: {
-    color: '#2E7D32',
+    color: '#C41E3A',
     textDecorationLine: 'underline' as const,
   },
 });

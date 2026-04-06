@@ -54,7 +54,7 @@ export function FindAProScreen({ navigation: _ }: Props) {
   return (
     <ScreenContainer scrollable={false} padded={false}>
       <View style={styles.infoCard}>
-        <MaterialCommunityIcons name="information-outline" size={20} color="#2E7D32" />
+        <MaterialCommunityIcons name="information-outline" size={20} color="#C41E3A" />
         <View style={styles.infoText}>
           <Text variant="labelMedium" style={styles.infoTitle}>Based on your scan</Text>
           <Text variant="bodySmall" style={styles.infoBody}>

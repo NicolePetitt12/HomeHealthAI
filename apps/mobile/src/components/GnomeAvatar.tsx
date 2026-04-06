@@ -13,8 +13,8 @@ function GnomeIdle({ size }: { size: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 200 200">
       {/* Hat */}
-      <Polygon points="100,20 60,90 140,90" fill="#2E7D32" />
-      <Ellipse cx="100" cy="90" rx="42" ry="10" fill="#1B5E20" />
+      <Polygon points="100,20 60,90 140,90" fill="#C41E3A" />
+      <Ellipse cx="100" cy="90" rx="42" ry="10" fill="#7F0000" />
       <Rect x="62" y="83" width="76" height="12" rx="6" fill="#4CAF50" />
       {/* Face */}
       <Ellipse cx="100" cy="115" rx="28" ry="26" fill="#FFCC80" />
@@ -30,19 +30,19 @@ function GnomeIdle({ size }: { size: number }) {
       {/* Beard */}
       <Path d="M76 130 Q78 148 100 152 Q122 148 124 130" fill="#FAFAFA" />
       {/* Body */}
-      <Rect x="72" y="148" width="56" height="36" rx="10" fill="#2E7D32" />
+      <Rect x="72" y="148" width="56" height="36" rx="10" fill="#C41E3A" />
       {/* Arms */}
-      <Ellipse cx="60" cy="163" rx="14" ry="8" fill="#388E3C" />
-      <Ellipse cx="140" cy="163" rx="14" ry="8" fill="#388E3C" />
+      <Ellipse cx="60" cy="163" rx="14" ry="8" fill="#D32F2F" />
+      <Ellipse cx="140" cy="163" rx="14" ry="8" fill="#D32F2F" />
       {/* Hands */}
       <Circle cx="50" cy="168" r="7" fill="#FFCC80" />
       <Circle cx="150" cy="168" r="7" fill="#FFCC80" />
       {/* Belt */}
-      <Rect x="72" y="165" width="56" height="8" rx="4" fill="#1B5E20" />
+      <Rect x="72" y="165" width="56" height="8" rx="4" fill="#7F0000" />
       <Rect x="96" y="163" width="8" height="12" rx="2" fill="#FFA000" />
       {/* Legs */}
-      <Rect x="78" y="182" width="18" height="20" rx="6" fill="#1B5E20" />
-      <Rect x="104" y="182" width="18" height="20" rx="6" fill="#1B5E20" />
+      <Rect x="78" y="182" width="18" height="20" rx="6" fill="#7F0000" />
+      <Rect x="104" y="182" width="18" height="20" rx="6" fill="#7F0000" />
       {/* Boots */}
       <Ellipse cx="87" cy="200" rx="12" ry="6" fill="#4E342E" />
       <Ellipse cx="113" cy="200" rx="12" ry="6" fill="#4E342E" />
@@ -55,8 +55,8 @@ function GnomeAnalyzing({ size }: { size: number }) {
     <Svg width={size} height={size} viewBox="0 0 200 200">
       {/* Hat (slightly tilted) */}
       <G transform="rotate(-8, 100, 60)">
-        <Polygon points="100,20 60,90 140,90" fill="#2E7D32" />
-        <Ellipse cx="100" cy="90" rx="42" ry="10" fill="#1B5E20" />
+        <Polygon points="100,20 60,90 140,90" fill="#C41E3A" />
+        <Ellipse cx="100" cy="90" rx="42" ry="10" fill="#7F0000" />
         <Rect x="62" y="83" width="76" height="12" rx="6" fill="#4CAF50" />
       </G>
       {/* Face */}
@@ -76,11 +76,11 @@ function GnomeAnalyzing({ size }: { size: number }) {
       {/* Beard */}
       <Path d="M76 131 Q78 149 100 153 Q122 149 124 131" fill="#FAFAFA" />
       {/* Body */}
-      <Rect x="72" y="149" width="56" height="36" rx="10" fill="#2E7D32" />
+      <Rect x="72" y="149" width="56" height="36" rx="10" fill="#C41E3A" />
       {/* Left arm */}
-      <Ellipse cx="60" cy="163" rx="14" ry="8" fill="#388E3C" />
+      <Ellipse cx="60" cy="163" rx="14" ry="8" fill="#D32F2F" />
       {/* Right arm raised */}
-      <Path d="M140 155 L158 138" stroke="#388E3C" strokeWidth="14" strokeLinecap="round" />
+      <Path d="M140 155 L158 138" stroke="#D32F2F" strokeWidth="14" strokeLinecap="round" />
       {/* Hands */}
       <Circle cx="50" cy="168" r="7" fill="#FFCC80" />
       <Circle cx="160" cy="136" r="8" fill="#FFCC80" />
@@ -88,11 +88,11 @@ function GnomeAnalyzing({ size }: { size: number }) {
       <Circle cx="172" cy="120" r="14" stroke="#FFA000" strokeWidth="4" fill="rgba(165,214,255,0.4)" />
       <Path d="M162 130 L152 140" stroke="#FFA000" strokeWidth="4" strokeLinecap="round" />
       {/* Belt */}
-      <Rect x="72" y="166" width="56" height="8" rx="4" fill="#1B5E20" />
+      <Rect x="72" y="166" width="56" height="8" rx="4" fill="#7F0000" />
       <Rect x="96" y="164" width="8" height="12" rx="2" fill="#FFA000" />
       {/* Legs */}
-      <Rect x="78" y="183" width="18" height="20" rx="6" fill="#1B5E20" />
-      <Rect x="104" y="183" width="18" height="20" rx="6" fill="#1B5E20" />
+      <Rect x="78" y="183" width="18" height="20" rx="6" fill="#7F0000" />
+      <Rect x="104" y="183" width="18" height="20" rx="6" fill="#7F0000" />
       {/* Boots */}
       <Ellipse cx="87" cy="200" rx="12" ry="6" fill="#4E342E" />
       <Ellipse cx="113" cy="200" rx="12" ry="6" fill="#4E342E" />

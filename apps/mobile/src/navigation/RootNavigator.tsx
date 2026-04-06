@@ -63,8 +63,8 @@ export function RootNavigator() {
 
   if (isLoading || hasOnboarded === null || hasAcceptedTerms === null) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#121212' }}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000000' }}>
+        <ActivityIndicator size="large" color="#C41E3A" />
       </View>
     );
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -21,7 +21,7 @@ export default function App() {
           <LegalConsentProvider>
             <QueryClientProvider client={queryClient}>
               <PaperProvider theme={theme}>
-                <NavigationContainer>
+                <NavigationContainer theme={{ ...NavDarkTheme, colors: { ...NavDarkTheme.colors, background: '#000000' } }}>
                   <RootNavigator />
                   <StatusBar style="light" />
                 </NavigationContainer>

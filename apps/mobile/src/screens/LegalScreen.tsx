@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import Markdown from '@ronradtke/react-native-markdown-display';
+import { AppBackground } from '../components';
 import { spacing } from '../theme';
 import type { AuthStackScreenProps } from '../navigation/types';
 
@@ -12,16 +13,18 @@ export function LegalScreen({ route }: Props) {
   const { content } = route.params;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Markdown style={markdownStyles}>{content}</Markdown>
-    </ScrollView>
+    <AppBackground>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Markdown style={markdownStyles}>{content}</Markdown>
+      </ScrollView>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'transparent',
   },
   content: {
     padding: spacing.xl,
@@ -34,7 +37,7 @@ const markdownStyles = {
     color: '#E0E0E0',
     fontSize: 14,
     lineHeight: 22,
-    backgroundColor: '#121212',
+    backgroundColor: '#0D0807',
   },
   heading1: {
     color: '#FFFFFF',
@@ -69,7 +72,7 @@ const markdownStyles = {
     color: '#B0B0B0',
   },
   link: {
-    color: '#2E7D32',
+    color: '#C41E3A',
   },
   bullet_list: {
     marginBottom: spacing.md,
@@ -81,12 +84,12 @@ const markdownStyles = {
     color: '#E0E0E0',
   },
   hr: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#2A1A1A',
     height: 1,
     marginVertical: spacing.lg,
   },
   code_inline: {
     color: '#A5D6A7',
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1C1212',
   },
 };

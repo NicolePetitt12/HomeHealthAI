@@ -26,26 +26,13 @@ npm install
 
 This installs all dependencies for every workspace package simultaneously using npm workspaces.
 
-Then build the shared types package (required before backend or mobile can start):
+Then build the shared types package (required before mobile can start):
 
 ```bash
 cd packages/shared && npm run build && cd ../..
 ```
 
 ## Environment Variables
-
-### Backend (`apps/backend/.env`)
-
-```bash
-cp apps/backend/.env.example apps/backend/.env
-```
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `SUPABASE_URL` | Local Supabase API URL | `http://127.0.0.1:54321` |
-| `SUPABASE_ANON_KEY` | Publishable key (from `supabase status`) | `sb_publishable_...` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Secret key — backend only, never expose to clients | `sb_secret_...` |
-| `PORT` | NestJS server port | `3000` |
 
 ### Mobile (`apps/mobile/.env`)
 
@@ -55,11 +42,10 @@ cp apps/mobile/.env.example apps/mobile/.env
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `EXPO_PUBLIC_SUPABASE_URL` | Same local Supabase URL | `http://127.0.0.1:54321` |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Same anon/publishable key | `sb_publishable_...` |
-| `EXPO_PUBLIC_API_URL` | NestJS backend URL | `http://localhost:3000/api` |
+| `EXPO_PUBLIC_SUPABASE_URL` | Local Supabase API URL — use LAN IP, not localhost | `http://192.168.1.x:54321` |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Publishable key (from `supabase status`) | `sb_publishable_...` |
 
-> **Note:** Mobile env vars must be prefixed `EXPO_PUBLIC_` to be accessible at runtime in Expo. Variables without this prefix are not bundled into the app.
+> **Note:** Mobile env vars must be prefixed `EXPO_PUBLIC_` to be accessible at runtime in Expo. Use your machine's LAN IP (not `127.0.0.1`) so physical devices and emulators can reach local Supabase.
 
 ### Getting Supabase Keys
 
@@ -73,8 +59,8 @@ npx supabase status
 Output:
 ```
 API URL: http://127.0.0.1:54321
-Publishable: sb_publishable_XXXX    ← use as SUPABASE_ANON_KEY
-Secret:      sb_secret_XXXX         ← use as SUPABASE_SERVICE_ROLE_KEY
+Publishable: sb_publishable_XXXX    ← use as EXPO_PUBLIC_SUPABASE_ANON_KEY
+Secret:      sb_secret_XXXX         ← used internally by Edge Functions (auto-injected)
 ```
 
 Local keys are deterministic — they do not change between restarts, so you only need to do this once.
@@ -99,22 +85,20 @@ npx supabase stop
 npx supabase stop --no-backup
 ```
 
-### 2. Backend (NestJS)
+### 2. Edge Functions (optional — for local AI pipeline testing)
 
 ```bash
 cd apps/backend
-
-# Development (watch mode — restarts on file changes)
-npm run start:dev
-
-# Production build + run
-npm run build
-npm run start:prod
+npx supabase functions serve
 ```
 
-The API starts at `http://localhost:3000/api`. Health check:
+Edge Functions run at `http://127.0.0.1:54321/functions/v1`. They are also served automatically when `supabase start` is running. To test the `analyze-scan` function manually:
+
 ```bash
-curl http://localhost:3000/api/health
+curl -X POST http://127.0.0.1:54321/functions/v1/analyze-scan \
+  -H "Authorization: Bearer <service_role_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"record": {"id": "...", "user_id": "...", "location": "Basement", "image_path": "...", "status": "pending"}}'
 ```
 
 ### 3. Mobile (Expo)
@@ -134,7 +118,7 @@ npx expo start --ios
 - Press `a` to open in Android emulator
 - Press `i` to open in iOS simulator (macOS only)
 
-> **On physical device:** Make sure your phone and development machine are on the same Wi-Fi network. For the mobile app to reach the backend, use your machine's local IP address instead of `localhost` in `EXPO_PUBLIC_API_URL` (e.g., `http://192.168.1.x:3000/api`).
+> **On physical device:** Make sure your phone and development machine are on the same Wi-Fi network. Use your machine's LAN IP in `EXPO_PUBLIC_SUPABASE_URL` (e.g., `http://192.168.1.x:54321`).
 
 ### 4. Run Everything Together
 
@@ -144,14 +128,13 @@ From the workspace root, Turborepo starts all services in parallel:
 npm run dev
 ```
 
-This runs the `dev` task for all packages concurrently (backend watch mode + mobile Expo server + shared package watcher).
+This runs the `dev` task for all packages concurrently (mobile Expo server + shared package watcher).
 
 ## Ports Reference
 
 | Service | Port | URL |
 |---------|------|-----|
-| NestJS API | 3000 | `http://localhost:3000/api` |
-| Supabase API | 54321 | `http://127.0.0.1:54321` |
+| Supabase API + Edge Functions | 54321 | `http://127.0.0.1:54321` |
 | PostgreSQL | 54322 | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
 | Supabase Studio | 54323 | `http://127.0.0.1:54323` |
 | Inbucket (email testing) | 54324 | `http://127.0.0.1:54324` |
@@ -162,7 +145,7 @@ This runs the `dev` task for all packages concurrently (backend watch mode + mob
 
 ## Shared Package
 
-The `packages/shared` package contains all Zod schemas and TypeScript types shared between the backend and mobile. It must be compiled to `dist/` before being imported.
+The `packages/shared` package contains all Zod schemas and TypeScript types shared between Edge Functions and mobile. It must be compiled to `dist/` before being imported.
 
 ```bash
 # One-time build

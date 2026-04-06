@@ -109,7 +109,7 @@ A photo submission for AI mold analysis.
 | `status` | `scan_status` | `pending → processing → completed / failed` |
 
 ### `analysis_results`
-The AI output for a completed scan. Written exclusively by the backend (service role).
+The AI output for a completed scan. Written exclusively by the `analyze-scan` Edge Function (service role).
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -165,7 +165,7 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp", "image/heic"]
 
 ## Row Level Security (RLS)
 
-All tables have RLS enabled. The **backend uses the service role key** (bypasses RLS). The **mobile Supabase client uses the anon key** (subject to RLS).
+All tables have RLS enabled. **Edge Functions use the service role key** (bypasses RLS). The **mobile Supabase client uses the anon key** (subject to RLS).
 
 | Table | Policy Summary |
 |-------|---------------|

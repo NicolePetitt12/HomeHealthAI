@@ -1,58 +1,46 @@
 # Testing & Quality
 
-## Backend Tests
+## Edge Function Tests
 
-### Unit tests
+### Test analyze-scan locally
 
-```bash
-cd apps/backend
-npm run test
-```
-
-Runs Jest against all `*.spec.ts` files in `src/`. Each NestJS module should have a corresponding spec file in the same directory.
-
-### Watch mode
+With `supabase start` running, serve functions and send a test request:
 
 ```bash
 cd apps/backend
-npm run test:watch
+npx supabase functions serve
 ```
 
-Re-runs tests on file changes — useful during active development.
+In another terminal:
+```bash
+# Get the service role key
+cd apps/backend && npx supabase status
 
-### Coverage report
+# Send a test scan payload
+curl -X POST http://127.0.0.1:54321/functions/v1/analyze-scan \
+  -H "Authorization: Bearer <service_role_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "record": {
+      "id": "00000000-0000-0000-0000-000000000099",
+      "user_id": "00000000-0000-0000-0000-000000000001",
+      "location": "Basement - West Wall",
+      "image_path": "test/image.jpg",
+      "notes": null,
+      "status": "pending"
+    }
+  }'
+```
 
+Expected response: `{"success": true, "scanId": "..."}` and a new row in `analysis_results`.
+
+Verify in Supabase Studio (`http://127.0.0.1:54323`) or:
 ```bash
 cd apps/backend
-npm run test:cov
+npx supabase db query "SELECT * FROM analysis_results ORDER BY created_at DESC LIMIT 1;"
 ```
-
-Generates a coverage report in `apps/backend/coverage/`.
-
-### Single test file
-
-```bash
-cd apps/backend
-npx jest src/app.controller.spec.ts
-```
-
-### End-to-end tests
-
-```bash
-cd apps/backend
-npm run test:e2e
-```
-
-Uses the `test/jest-e2e.json` Jest configuration and targets `test/**/*.e2e-spec.ts` files.
 
 ## Type Checking
-
-### Backend
-
-```bash
-cd apps/backend
-npx tsc --noEmit
-```
 
 ### Shared package
 
@@ -76,7 +64,7 @@ npm run build   # runs tsc --noEmit
 npm run build   # from workspace root
 ```
 
-Turborepo builds packages in the correct order (shared → backend/mobile).
+Turborepo builds packages in the correct order (shared → mobile).
 
 ## Linting
 
@@ -89,12 +77,9 @@ npm run lint    # from workspace root
 ### Single package
 
 ```bash
-cd apps/backend && npm run lint
 cd apps/mobile && npm run lint
 cd packages/shared && npm run lint
 ```
-
-The backend linter runs with `--fix` by default.
 
 ## Formatting
 

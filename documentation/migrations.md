@@ -9,6 +9,7 @@ All migrations are managed with the Supabase CLI and live in `apps/backend/supab
 | `20260324224647_create_schema.sql` | Creates all tables, enums, indexes, and triggers |
 | `20260324224738_create_rls_policies.sql` | Enables RLS and creates all row-level security policies |
 | `20260324224800_create_storage_buckets.sql` | Creates the `scan-images` storage bucket and storage policies |
+| `20260406000000_create_analyze_scan_webhook.sql` | Adds `pg_net` trigger on `scans` INSERT to fire `analyze-scan` Edge Function |
 
 ## Applying Migrations
 
@@ -63,7 +64,7 @@ This creates an empty file at `supabase/migrations/{timestamp}_{name}.sql`. Edit
 
 ## Naming Conventions
 
-Database columns use `snake_case`. Zod schemas (in `packages/shared`) use `camelCase`. The NestJS service layer maps between them.
+Database columns use `snake_case`. Zod schemas (in `packages/shared`) use `camelCase`. The mobile app and Edge Functions each handle the mapping.
 
 | Database | Zod / TypeScript |
 |----------|-----------------|

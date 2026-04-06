@@ -1,20 +1,40 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Text, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenContainer } from '../components';
 import { useAuth } from '../hooks/useAuth';
 import { spacing, radii } from '../theme';
+import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
+import { TERMS_OF_SERVICE_MD } from '../content/termsOfService';
+import type { MainTabScreenProps } from '../navigation/types';
 
-const MENU_ITEMS = [
-  { icon: 'bell-outline', label: 'Notifications' },
-  { icon: 'shield-account-outline', label: 'Privacy & Security' },
-  { icon: 'help-circle-outline', label: 'Help & Support' },
-  { icon: 'information-outline', label: 'About Inspector Gnome' },
-] as const;
+type Props = MainTabScreenProps<'ProfileTab'>;
 
-export function ProfileScreen() {
-  const { user, signOut } = useAuth();
+export function ProfileScreen({ navigation }: Props) {
+  const { user, signOut, deleteAccount } = useAuth();
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all inspection data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAccount();
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err);
+              Alert.alert('Error', msg);
+            }
+          },
+        },
+      ],
+    );
+  }
 
   const initials = user?.email?.charAt(0).toUpperCase() ?? '?';
 
@@ -35,16 +55,39 @@ export function ProfileScreen() {
       </View>
 
       <View style={styles.menu}>
-        {MENU_ITEMS.map((item, index) => (
-          <View key={item.label}>
-            <View style={styles.menuItem}>
-              <MaterialCommunityIcons name={item.icon} size={22} color="#B0B0B0" />
-              <Text variant="bodyLarge" style={styles.menuLabel}>{item.label}</Text>
-              <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
-            </View>
-            {index < MENU_ITEMS.length - 1 && <Divider style={styles.divider} />}
+        <TouchableOpacity onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="shield-account-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Privacy Policy</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
           </View>
-        ))}
+        </TouchableOpacity>
+        <Divider style={styles.divider} />
+        <TouchableOpacity onPress={() => navigation.navigate('Legal', { title: 'Terms of Service', content: TERMS_OF_SERVICE_MD })}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="file-document-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Terms of Service</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
+        <Divider style={styles.divider} />
+        <View style={styles.menuItem}>
+          <MaterialCommunityIcons name="bell-outline" size={22} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.menuLabel}>Notifications</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+        </View>
+        <Divider style={styles.divider} />
+        <View style={styles.menuItem}>
+          <MaterialCommunityIcons name="help-circle-outline" size={22} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.menuLabel}>Help & Support</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+        </View>
+        <Divider style={styles.divider} />
+        <View style={styles.menuItem}>
+          <MaterialCommunityIcons name="information-outline" size={22} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.menuLabel}>About Inspector Gnome</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+        </View>
       </View>
 
       <Button
@@ -55,6 +98,15 @@ export function ProfileScreen() {
         contentStyle={styles.signOutContent}
       >
         Sign Out
+      </Button>
+
+      <Button
+        mode="text"
+        onPress={handleDeleteAccount}
+        textColor="#888888"
+        contentStyle={styles.signOutContent}
+      >
+        Delete Account
       </Button>
     </ScreenContainer>
   );

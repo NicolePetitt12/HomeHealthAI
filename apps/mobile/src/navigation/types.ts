@@ -16,6 +16,7 @@ export type OnboardingStackParamList = {
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
+  Legal: { title: string; content: string };
 };
 
 // ─── Main Tabs ───────────────────────────────────────────────────────────────
@@ -35,12 +36,14 @@ export type MainStackParamList = {
   FindAPro: { scanId?: string };
   Camera: undefined;
   PhotoReview: { imageUri: string; source: 'camera' | 'gallery' };
+  Legal: { title: string; content: string };
 };
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 
 export type RootStackParamList = {
   Onboarding: undefined;
+  TermsAcceptance: undefined;
   Auth: undefined;
   Main: undefined;
 };

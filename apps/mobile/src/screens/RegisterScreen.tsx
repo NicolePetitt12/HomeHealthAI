@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/types';
 import { useAuth } from '../hooks/useAuth';
 import { useOnboarding } from '../contexts/OnboardingContext';
+import { useLegalConsent } from '../contexts/LegalConsentContext';
 import { GnomeAvatar } from '../components';
 import { spacing } from '../theme';
+import { TERMS_OF_SERVICE_MD } from '../content/termsOfService';
+import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export function RegisterScreen({ navigation }: Props) {
   const { signUp } = useAuth();
   const { resetOnboarding } = useOnboarding();
+  const { resetTerms } = useLegalConsent();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +42,7 @@ export function RegisterScreen({ navigation }: Props) {
     try {
       await signUp(email.trim(), password, fullName.trim());
       await resetOnboarding();
+      await resetTerms();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
@@ -115,6 +120,24 @@ export function RegisterScreen({ navigation }: Props) {
             Create Account
           </Button>
 
+          <Text variant="bodySmall" style={styles.legalText}>
+            {'By creating an account, you agree to our '}
+            <Text
+              style={styles.legalLink}
+              onPress={() => navigation.navigate('Legal', { title: 'Terms of Service', content: TERMS_OF_SERVICE_MD })}
+            >
+              Terms of Service
+            </Text>
+            {' and '}
+            <Text
+              style={styles.legalLink}
+              onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}
+            >
+              Privacy Policy
+            </Text>
+            .
+          </Text>
+
           <Button
             mode="text"
             onPress={() => navigation.navigate('Login')}
@@ -167,5 +190,14 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: spacing.sm,
+  },
+  legalText: {
+    color: '#888888',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: '#2E7D32',
+    textDecorationLine: 'underline' as const,
   },
 });

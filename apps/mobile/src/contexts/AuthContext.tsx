@@ -9,6 +9,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -51,8 +52,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   }
 
+  async function deleteAccount() {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession?.access_token) throw new Error('Not authenticated');
+
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
+    const response = await fetch(`${supabaseUrl}/functions/v1/delete-account`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentSession.access_token}`,
+      },
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error ?? 'Account deletion failed');
+    }
+    await signOut();
+  }
+
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, isLoading, signIn, signUp, signOut, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

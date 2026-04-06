@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { store } from './src/store';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { OnboardingProvider } from './src/contexts/OnboardingContext';
+import { LegalConsentProvider } from './src/contexts/LegalConsentContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { theme } from './src/theme';
 
@@ -17,14 +18,16 @@ export default function App() {
     <ReduxProvider store={store}>
       <AuthProvider>
         <OnboardingProvider>
-          <QueryClientProvider client={queryClient}>
-            <PaperProvider theme={theme}>
-              <NavigationContainer>
-                <RootNavigator />
-                <StatusBar style="light" />
-              </NavigationContainer>
-            </PaperProvider>
-          </QueryClientProvider>
+          <LegalConsentProvider>
+            <QueryClientProvider client={queryClient}>
+              <PaperProvider theme={theme}>
+                <NavigationContainer>
+                  <RootNavigator />
+                  <StatusBar style="light" />
+                </NavigationContainer>
+              </PaperProvider>
+            </QueryClientProvider>
+          </LegalConsentProvider>
         </OnboardingProvider>
       </AuthProvider>
     </ReduxProvider>

@@ -14,6 +14,7 @@ export { GnomeAvatar } from './GnomeAvatar';
 export { ProfessionalCard } from './ProfessionalCard';
 export { CameraTabButton } from './CameraTabButton';
 export { CameraGridOverlay } from './CameraGridOverlay';
+export { AppLogo } from './AppLogo';
 export { ProgressOverlay } from './ProgressOverlay';
 export { ConcernLevelCard } from './ConcernLevelCard';
 export { NextStepsPanel } from './NextStepsPanel';

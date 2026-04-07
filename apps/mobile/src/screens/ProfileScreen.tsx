@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Text, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ScreenContainer } from '../components';
+import { ScreenContainer, AppLogo } from '../components';
 import { useAuth } from '../hooks/useAuth';
 import { spacing, radii } from '../theme';
 import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
@@ -36,22 +36,20 @@ export function ProfileScreen({ navigation }: Props) {
     );
   }
 
-  const initials = user?.email?.charAt(0).toUpperCase() ?? '?';
-
   return (
     <ScreenContainer>
-      <View style={styles.header}>
-        <Text variant="headlineSmall" style={styles.title}>Profile</Text>
-      </View>
-
-      <View style={styles.avatarSection}>
-        <View style={styles.avatar}>
-          <Text variant="headlineLarge" style={styles.initials}>{initials}</Text>
+      <View style={styles.profileCard}>
+        <View style={styles.logoSide}>
+          <AppLogo size={130} />
         </View>
-        <Text variant="titleMedium" style={styles.name}>
-          {user?.user_metadata?.full_name ?? 'Homeowner'}
-        </Text>
-        <Text variant="bodySmall" style={styles.email}>{user?.email}</Text>
+        <View style={styles.infoSide}>
+          <Text variant="headlineSmall" style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+            {user?.user_metadata?.full_name ?? 'Homeowner'}
+          </Text>
+          <Text variant="bodyLarge" style={styles.email} numberOfLines={1} ellipsizeMode="tail">
+            {user?.email}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.menu}>
@@ -128,38 +126,36 @@ export function ProfileScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  title: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  avatarSection: {
+  profileCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xxxl,
+    backgroundColor: '#1C1212',
+    borderRadius: radii.xl,
+    padding: spacing.xl,
+    marginTop: spacing.lg,
+    marginBottom: spacing.xxl,
+    minHeight: 180,
+    borderWidth: 1,
+    borderColor: '#2A1A1A',
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#C41E3A',
+  logoSide: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
   },
-  initials: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  infoSide: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: spacing.xs,
   },
   name: {
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 24,
   },
   email: {
     color: '#B0B0B0',
+    fontSize: 16,
   },
   menu: {
     backgroundColor: '#1C1212',

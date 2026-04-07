@@ -68,7 +68,8 @@ export function ResultsScreen({ navigation, route }: Props) {
     ? {
         ...realAnalysis,
         likelyIssue: getMockAnalysis(realAnalysis.riskLevel).likelyIssue,
-        suggestedProfessionalType: getMockAnalysis(realAnalysis.riskLevel).suggestedProfessionalType,
+        suggestedProfessionalType: getMockAnalysis(realAnalysis.riskLevel)
+          .suggestedProfessionalType,
       }
     : getMockAnalysis('moderate');
   const confidence = Math.round(analysis.confidence * 100);
@@ -89,12 +90,20 @@ export function ResultsScreen({ navigation, route }: Props) {
       )}
 
       {/* 2. Location + Notes */}
-      <Text variant="labelSmall" style={styles.metaLabel}>Location</Text>
-      <Text variant="bodySmall" style={styles.metaValue}>{scan?.location ?? 'Unknown location'}</Text>
+      <Text variant="labelSmall" style={styles.metaLabel}>
+        Location
+      </Text>
+      <Text variant="bodySmall" style={styles.metaValue}>
+        {scan?.location ?? 'Unknown location'}
+      </Text>
       {scan?.notes ? (
         <>
-          <Text variant="labelSmall" style={[styles.metaLabel, { marginTop: spacing.sm }]}>Notes</Text>
-          <Text variant="bodySmall" style={styles.metaValue}>{scan.notes}</Text>
+          <Text variant="labelSmall" style={[styles.metaLabel, { marginTop: spacing.sm }]}>
+            Notes
+          </Text>
+          <Text variant="bodySmall" style={styles.metaValue}>
+            {scan.notes}
+          </Text>
         </>
       ) : null}
 
@@ -103,7 +112,9 @@ export function ResultsScreen({ navigation, route }: Props) {
         <View style={styles.section}>
           <View style={styles.processingCard}>
             <GnomeAvatar state="analyzing" size={72} />
-            <Text variant="titleMedium" style={styles.processingTitle}>Analyzing your photo…</Text>
+            <Text variant="titleMedium" style={styles.processingTitle}>
+              Analyzing your photo…
+            </Text>
             <Text variant="bodySmall" style={styles.processingText}>
               Inspector Gnome is reviewing the image. This usually takes a few seconds.
             </Text>
@@ -115,21 +126,9 @@ export function ResultsScreen({ navigation, route }: Props) {
           {/* 3. Likely Issue */}
           <View style={styles.section}>
             <SectionHeader title="What We Found" />
-            <Text variant="titleLarge" style={styles.likelyIssue}>{analysis.likelyIssue}</Text>
-          </View>
-
-          {/* 4. Concern Level card */}
-          <View style={styles.section}>
-            <SectionHeader title="Concern Level" />
-            <ConcernLevelCard riskLevel={analysis.riskLevel} confidence={confidence} />
-          </View>
-
-          {/* 5. Gnome explanation */}
-          <View style={styles.gnomeRow}>
-            <GnomeAvatar state={gnomeState} size={64} />
-            <View style={styles.gnomeTipWrap}>
-              <GnomeTip text={analysis.explanation ?? 'No explanation available.'} />
-            </View>
+            <Text variant="titleLarge" style={styles.likelyIssue}>
+              {analysis.likelyIssue}
+            </Text>
           </View>
 
           {/* 6. Educational context */}
@@ -151,10 +150,16 @@ export function ResultsScreen({ navigation, route }: Props) {
                     )}
                   </View>
                   <View style={styles.findingBody}>
-                    <Text variant="labelMedium" style={styles.findingType}>{finding.type}</Text>
-                    <Text variant="bodySmall" style={styles.findingDesc}>{finding.description}</Text>
+                    <Text variant="labelMedium" style={styles.findingType}>
+                      {finding.type}
+                    </Text>
+                    <Text variant="bodySmall" style={styles.findingDesc}>
+                      {finding.description}
+                    </Text>
                     {finding.location ? (
-                      <Text variant="labelSmall" style={styles.findingLocation}>{finding.location}</Text>
+                      <Text variant="labelSmall" style={styles.findingLocation}>
+                        {finding.location}
+                      </Text>
                     ) : null}
                   </View>
                 </View>
@@ -175,7 +180,8 @@ export function ResultsScreen({ navigation, route }: Props) {
               <View style={styles.proCard}>
                 <Text variant="bodyMedium" style={styles.proText}>
                   Based on what I found, we recommend consulting a{' '}
-                  <Text style={styles.proHighlight}>{professionalLabel}</Text> for a thorough assessment.
+                  <Text style={styles.proHighlight}>{professionalLabel}</Text> for a thorough
+                  assessment.
                 </Text>
                 <Button
                   mode="contained"

@@ -11,8 +11,10 @@ import { MainTabNavigator } from './MainTabNavigator';
 import { ResultsScreen } from '../screens/ResultsScreen';
 import { FindAProScreen } from '../screens/FindAProScreen';
 import { CameraScreen } from '../screens/CameraScreen';
+import { StartScanScreen } from '../screens/StartScanScreen';
 import { PhotoReviewScreen } from '../screens/PhotoReviewScreen';
 import { LegalScreen } from '../screens/LegalScreen';
+import { ComingSoonScreen } from '../screens/ComingSoonScreen';
 import type { RootStackParamList, MainStackParamList } from './types';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
@@ -22,6 +24,11 @@ function MainNavigator() {
   return (
     <Main.Navigator screenOptions={{ headerShown: false }}>
       <Main.Screen name="Tabs" component={MainTabNavigator} />
+      <Main.Screen
+        name="StartScan"
+        component={StartScanScreen}
+        options={{ headerShown: true, title: 'New Scan', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+      />
       <Main.Screen
         name="Camera"
         component={CameraScreen}
@@ -45,6 +52,16 @@ function MainNavigator() {
       <Main.Screen
         name="Legal"
         component={LegalScreen}
+        options={({ route }) => ({
+          headerShown: true,
+          title: route.params.title,
+          headerStyle: { backgroundColor: '#1A1A1A' },
+          headerTintColor: '#FFFFFF',
+        })}
+      />
+      <Main.Screen
+        name="ComingSoon"
+        component={ComingSoonScreen}
         options={({ route }) => ({
           headerShown: true,
           title: route.params.title,

@@ -55,6 +55,14 @@ export function ProfileScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.menu}>
+        <TouchableOpacity onPress={() => navigation.navigate('HistoryTab')}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="clipboard-list-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Scan History</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
+        <Divider style={styles.divider} />
         <TouchableOpacity onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}>
           <View style={styles.menuItem}>
             <MaterialCommunityIcons name="shield-account-outline" size={22} color="#B0B0B0" />
@@ -71,33 +79,40 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <Divider style={styles.divider} />
-        <View style={styles.menuItem}>
-          <MaterialCommunityIcons name="bell-outline" size={22} color="#B0B0B0" />
-          <Text variant="bodyLarge" style={styles.menuLabel}>Notifications</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Notifications' })}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="bell-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Notifications</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
         <Divider style={styles.divider} />
-        <View style={styles.menuItem}>
-          <MaterialCommunityIcons name="help-circle-outline" size={22} color="#B0B0B0" />
-          <Text variant="bodyLarge" style={styles.menuLabel}>Help & Support</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Settings' })}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="cog-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Settings</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
         <Divider style={styles.divider} />
-        <View style={styles.menuItem}>
-          <MaterialCommunityIcons name="information-outline" size={22} color="#B0B0B0" />
-          <Text variant="bodyLarge" style={styles.menuLabel}>About Inspector Gnome</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Help & Support' })}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="help-circle-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Help & Support</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <Button
-        mode="outlined"
+        mode="contained"
         onPress={signOut}
-        textColor="#CF6679"
-        style={styles.signOut}
+        buttonColor="#C41E3A"
+        textColor="#FFFFFF"
+        style={styles.logOut}
         contentStyle={styles.signOutContent}
       >
-        Sign Out
+        Log Out
       </Button>
 
       <Button
@@ -165,8 +180,8 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: '#2A1A1A',
   },
-  signOut: {
-    borderColor: '#CF6679',
+  logOut: {
+    borderRadius: 8,
   },
   signOutContent: {
     paddingVertical: spacing.sm,

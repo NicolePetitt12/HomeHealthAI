@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import {
   ScreenContainer,
   HeroCard,
@@ -80,29 +79,6 @@ function MoldStatusSection() {
 }
 
 export function HomeScreen({ navigation }: Props) {
-  async function handleUpload() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Inspector Gnome needs access to your photos to upload images.',
-        [{ text: 'OK' }],
-      );
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      navigation.navigate('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery' });
-    }
-  }
-
-  function handleCamera() {
-    navigation.navigate('Camera');
-  }
-
   function handleViewAll() {
     navigation.navigate('HistoryTab');
   }
@@ -124,12 +100,17 @@ export function HomeScreen({ navigation }: Props) {
 
       <HeroCard title="Protect Your Home" subtitle="Scan for mold and moisture risks instantly" />
 
-      <View style={styles.actions}>
-        <ActionCard icon="camera" label="Take Photo" onPress={handleCamera} />
-        <ActionCard icon="upload" label="Upload" onPress={handleUpload} />
-      </View>
+      {/* Start Scan — full-width red button */}
+      <TouchableOpacity
+        style={styles.startScanBtn}
+        onPress={() => navigation.navigate('StartScan')}
+        activeOpacity={0.85}
+      >
+        <MaterialCommunityIcons name="camera" size={20} color="#FFFFFF" />
+        <Text variant="labelLarge" style={styles.startScanText}>Start Scan</Text>
+      </TouchableOpacity>
 
-      <View style={[styles.actions, styles.actionsSecondary]}>
+      <View style={styles.secondaryActions}>
         <ActionCard
           icon="clipboard-list-outline"
           label="Scan History"
@@ -180,8 +161,27 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.xxl,
   },
-  actionsSecondary: {
-    marginTop: -spacing.lg,
+  secondaryActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.xxl,
+  },
+  startScanBtn: {
+    backgroundColor: '#C41E3A',
+    borderRadius: radii.lg,
+    paddingVertical: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+    marginHorizontal: 0,
+  },
+  startScanText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
   },
   tip: {
     marginTop: spacing.xl,

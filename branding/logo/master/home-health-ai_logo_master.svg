@@ -1,0 +1,52 @@
+<svg width="1024" height="1024" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield -->
+  <path d="M256 40 L440 120 V280 C440 380 340 450 256 480 C172 450 72 380 72 280 V120 Z"
+        fill="#0B0B0B" stroke="#E11D2E" stroke-width="10"/>
+
+  <!-- House Icon -->
+  <g transform="translate(140,160)">
+    <path d="M0 30 L40 0 L80 30 V80 H0 Z" fill="#FFFFFF"/>
+    <rect x="30" y="50" width="20" height="30" fill="#0B0B0B"/>
+  </g>
+
+  <!-- Gnome Head -->
+  <circle cx="256" cy="220" r="70" fill="#F5D0A9"/>
+  
+  <!-- Beard -->
+  <path d="M210 240 Q256 320 302 240 Q280 350 256 360 Q232 350 210 240"
+        fill="#FFFFFF"/>
+
+  <!-- Hat -->
+  <path d="M200 160 Q256 80 312 160 Q280 140 256 140 Q232 140 200 160"
+        fill="#E11D2E"/>
+
+  <!-- Eyes -->
+  <circle cx="235" cy="215" r="6" fill="#000"/>
+  <circle cx="277" cy="215" r="6" fill="#000"/>
+
+  <!-- Smile -->
+  <path d="M235 245 Q256 265 277 245" stroke="#000" stroke-width="3" fill="none"/>
+
+  <!-- Magnifying Glass -->
+  <circle cx="330" cy="230" r="28" stroke="#FFFFFF" stroke-width="5" fill="#1A1A1A"/>
+  
+  <!-- Green Particles -->
+  <circle cx="320" cy="225" r="4" fill="#22C55E"/>
+  <circle cx="335" cy="240" r="5" fill="#22C55E"/>
+  <circle cx="345" cy="220" r="3" fill="#22C55E"/>
+
+  <!-- Handle -->
+  <rect x="350" y="250" width="6" height="30" fill="#FFFFFF" transform="rotate(45 350 250)"/>
+
+  <!-- Thumbs Up -->
+  <rect x="180" y="220" width="20" height="40" rx="8" fill="#F5D0A9"/>
+  <circle cx="190" cy="210" r="12" fill="#F5D0A9"/>
+
+  <!-- Banner -->
+  <rect x="120" y="340" width="272" height="60" rx="12" fill="#E11D2E"/>
+
+  <!-- Text -->
+  <text x="256" y="380" text-anchor="middle" font-size="28" font-family="Arial, sans-serif" fill="#FFFFFF" font-weight="bold">
+    HOME HEALTH AI
+  </text>
+</svg>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useLegalConsent } from '../contexts/LegalConsentContext';
@@ -43,7 +44,17 @@ function MainNavigator() {
       <Main.Screen
         name="DetailedResults"
         component={DetailedResultsScreen}
-        options={{ headerShown: true, title: 'Scan Report', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+        options={({ navigation: nav }) => ({
+          headerShown: true,
+          title: 'Scan Report',
+          headerStyle: { backgroundColor: '#1A1A1A' },
+          headerTintColor: '#FFFFFF',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => nav.navigate('Tabs', { screen: 'HomeTab' })} style={{ marginRight: 8 }}>
+              <MaterialCommunityIcons name="chevron-left" size={28} color="#FFFFFF" />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Main.Screen
         name="FindAPro"

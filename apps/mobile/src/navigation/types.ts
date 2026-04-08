@@ -33,10 +33,11 @@ export type MainTabParamList = {
 export type MainStackParamList = {
   Tabs: NavigatorScreenParams<MainTabParamList>;
   Results: { inspectionId: string };
+  DetailedResults: { inspectionId: string; riskLevel: 'low' | 'moderate' | 'high' };
   FindAPro: { scanId?: string };
   Camera: undefined;
-  StartScan: undefined;
-  PhotoReview: { imageUri: string; source: 'camera' | 'gallery' };
+  StartScan: { prefillLocation?: string; prefillNotes?: string } | undefined;
+  PhotoReview: { imageUri: string; source: 'camera' | 'gallery'; prefillLocation?: string; prefillNotes?: string };
   Legal: { title: string; content: string };
   ComingSoon: { title: string };
 };

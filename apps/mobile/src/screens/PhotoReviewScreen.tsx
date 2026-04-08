@@ -10,9 +10,9 @@ import type { SubmitStage } from '../hooks/useSubmitScan';
 type Props = MainStackScreenProps<'PhotoReview'>;
 
 export function PhotoReviewScreen({ route, navigation }: Props) {
-  const { imageUri } = route.params;
-  const [location, setLocation] = useState('');
-  const [notes, setNotes] = useState('');
+  const { imageUri, prefillLocation, prefillNotes } = route.params;
+  const [location, setLocation] = useState(prefillLocation ?? '');
+  const [notes, setNotes] = useState(prefillNotes ?? '');
   const [progressVisible, setProgressVisible] = useState(false);
   const [stage, setStage] = useState<SubmitStage>('compressing');
   const [percent, setPercent] = useState(0);

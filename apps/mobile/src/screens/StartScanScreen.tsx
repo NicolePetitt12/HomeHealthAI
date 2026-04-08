@@ -10,7 +10,10 @@ import type { MainStackScreenProps } from '../navigation/types';
 
 type Props = MainStackScreenProps<'StartScan'>;
 
-export function StartScanScreen({ navigation }: Props) {
+export function StartScanScreen({ navigation, route }: Props) {
+  const prefillLocation = route.params?.prefillLocation;
+  const prefillNotes = route.params?.prefillNotes;
+
   function handleCamera() {
     navigation.navigate('Camera');
   }
@@ -30,7 +33,7 @@ export function StartScanScreen({ navigation }: Props) {
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
-      navigation.replace('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery' });
+      navigation.replace('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery', prefillLocation, prefillNotes });
     }
   }
 

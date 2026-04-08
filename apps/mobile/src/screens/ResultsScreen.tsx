@@ -1,37 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import { Text, Button } from 'react-native-paper';
-import {
-  ScreenContainer,
-  GnomeAvatar,
-  GnomeTip,
-  SectionHeader,
-  RiskDot,
-  ConcernLevelCard,
-  NextStepsPanel,
-  DisclaimerBanner,
-} from '../components';
+import { View, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ScreenContainer, GnomeAvatar, DisclaimerBanner } from '../components';
 import { spacing, radii } from '../theme';
 import { useAppSelector } from '../store/hooks';
 import { supabase } from '../services/supabase';
 import { useAnalysisResult } from '../hooks/useAnalysisResult';
-import { getMockAnalysis } from './results/mockAnalysisData';
+import { getMockAnalysis, categoryForRisk } from './results/mockAnalysisData';
 import type { MainStackScreenProps } from '../navigation/types';
-import type { RiskLevel } from '@inspector-gnome/shared';
 import type { GnomeState } from '../components';
+import type { ResultsViewData } from './results/mockAnalysisData';
 
 type Props = MainStackScreenProps<'Results'>;
 
-const PROFESSIONAL_LABELS: Record<string, string> = {
-  inspector: 'Mold Inspector',
-  remediation: 'Mold Remediation Specialist',
-  plumber: 'Plumber',
-  hvac: 'HVAC Technician',
+function buildViewData(
+  realAnalysis: NonNullable<ReturnType<typeof useAnalysisResult>['data']>,
+): ResultsViewData {
+  const mock = getMockAnalysis(realAnalysis.riskLevel);
+  return {
+    ...realAnalysis,
+    likelyIssue: mock.likelyIssue,
+    suggestedProfessionalType: mock.suggestedProfessionalType,
+    category: categoryForRisk(realAnalysis.riskLevel),
+    description: mock.description,
+    recommendationTitle: mock.recommendationTitle,
+    recommendations: mock.recommendations,
+    suspectedMoldType: mock.suspectedMoldType,
+    suspectedMoldDescription: mock.suspectedMoldDescription,
+  };
+}
+
+const TITLE_COLORS: Record<string, string> = {
+  mold_suspected: '#FF6B6B',
+  inconclusive: '#FFB74D',
+  clean_mold_safely: '#81C784',
 };
 
-function gnomeStateForRisk(risk: RiskLevel): GnomeState {
-  return risk === 'low' ? 'idle' : 'concern';
-}
+const TITLE_ICONS: Record<string, string> = {
+  mold_suspected: 'alert',
+  inconclusive: 'help-circle',
+  clean_mold_safely: 'spray-bottle',
+};
 
 export function ResultsScreen({ navigation, route }: Props) {
   const { inspectionId } = route.params;
@@ -39,48 +49,36 @@ export function ResultsScreen({ navigation, route }: Props) {
   const scan = currentScan?.id === inspectionId ? currentScan : null;
 
   const [imageUri, setImageUri] = useState<string | null>(null);
-
   useEffect(() => {
     if (!scan?.imagePath) return;
     supabase.storage
       .from('scan-images')
       .createSignedUrl(scan.imagePath, 3600)
-      .then(({ data }) => {
-        if (data?.signedUrl) setImageUri(data.signedUrl);
-      });
+      .then(({ data }) => { if (data?.signedUrl) setImageUri(data.signedUrl); });
   }, [scan?.imagePath]);
 
   const { data: realAnalysis } = useAnalysisResult(scan?.id);
-
-  // After 30s with no result from DB, fall back to mock data so the screen doesn't hang.
-  // This covers the case where the Edge Function webhook isn't set up yet.
   const [analysisTimedOut, setAnalysisTimedOut] = useState(false);
   useEffect(() => {
     if (realAnalysis) return;
-    const t = setTimeout(() => setAnalysisTimedOut(true), 30_000);
+    const t = setTimeout(() => setAnalysisTimedOut(true), 5_000);
     return () => clearTimeout(t);
   }, [realAnalysis]);
 
   const isProcessing = !realAnalysis && !analysisTimedOut;
-
-  // Use real analysis from DB when available; fall back to mock while processing or after timeout
-  const analysis = realAnalysis
-    ? {
-        ...realAnalysis,
-        likelyIssue: getMockAnalysis(realAnalysis.riskLevel).likelyIssue,
-        suggestedProfessionalType: getMockAnalysis(realAnalysis.riskLevel)
-          .suggestedProfessionalType,
-      }
+  const analysis: ResultsViewData = realAnalysis
+    ? buildViewData(realAnalysis)
     : getMockAnalysis('moderate');
-  const confidence = Math.round(analysis.confidence * 100);
-  const gnomeState: GnomeState = isProcessing ? 'analyzing' : gnomeStateForRisk(analysis.riskLevel);
-  const professionalLabel = analysis.suggestedProfessionalType
-    ? PROFESSIONAL_LABELS[analysis.suggestedProfessionalType]
-    : null;
+
+  const gnomeState: GnomeState = isProcessing ? 'analyzing'
+    : analysis.riskLevel === 'low' ? 'idle' : 'concern';
+
+  const titleColor = TITLE_COLORS[analysis.category] ?? '#FFFFFF';
+  const titleIcon = TITLE_ICONS[analysis.category] ?? 'information';
 
   return (
     <ScreenContainer>
-      {/* 1. Image preview */}
+      {/* Scanned image */}
       {imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
       ) : (
@@ -89,117 +87,73 @@ export function ResultsScreen({ navigation, route }: Props) {
         </View>
       )}
 
-      {/* 2. Location + Notes */}
-      <Text variant="labelSmall" style={styles.metaLabel}>
-        Location
-      </Text>
-      <Text variant="bodySmall" style={styles.metaValue}>
-        {scan?.location ?? 'Unknown location'}
-      </Text>
-      {scan?.notes ? (
-        <>
-          <Text variant="labelSmall" style={[styles.metaLabel, { marginTop: spacing.sm }]}>
-            Notes
-          </Text>
-          <Text variant="bodySmall" style={styles.metaValue}>
-            {scan.notes}
-          </Text>
-        </>
-      ) : null}
-
-      {/* Processing state */}
+      {/* Processing */}
       {isProcessing ? (
-        <View style={styles.section}>
-          <View style={styles.processingCard}>
-            <GnomeAvatar state="analyzing" size={72} />
-            <Text variant="titleMedium" style={styles.processingTitle}>
-              Analyzing your photo…
-            </Text>
-            <Text variant="bodySmall" style={styles.processingText}>
-              Inspector Gnome is reviewing the image. This usually takes a few seconds.
-            </Text>
-            <ActivityIndicator color="#C41E3A" style={{ marginTop: spacing.md }} />
-          </View>
+        <View style={styles.processingCard}>
+          <GnomeAvatar state="analyzing" size={72} />
+          <Text variant="titleMedium" style={styles.processingTitle}>
+            Analyzing your photo…
+          </Text>
+          <Text variant="bodySmall" style={styles.processingText}>
+            Inspector Gnome is reviewing the image. This usually takes a few seconds.
+          </Text>
+          <ActivityIndicator color="#C41E3A" style={{ marginTop: spacing.md }} />
         </View>
       ) : (
         <>
-          {/* 3. Likely Issue */}
-          <View style={styles.section}>
-            <SectionHeader title="What We Found" />
-            <Text variant="titleLarge" style={styles.likelyIssue}>
-              {analysis.likelyIssue}
-            </Text>
-          </View>
-
-          {/* 6. Educational context */}
-          <View style={styles.section}>
-            <GnomeTip text="All homes have some level of mold spores — this is completely normal. What matters is whether the conditions allow them to grow. Focus on moisture control and ventilation to keep your home healthy." />
-          </View>
-
-          {/* 7. Detailed Findings */}
-          <View style={styles.section}>
-            <SectionHeader title="Detailed Findings" />
-            <View style={styles.findingsCard}>
-              {analysis.findings.map((finding, index) => (
-                <View key={index} style={[styles.findingRow, index > 0 && styles.findingDivider]}>
-                  <View style={styles.findingLeft}>
-                    {finding.severity ? (
-                      <RiskDot level={finding.severity} size={10} />
-                    ) : (
-                      <View style={styles.dotPlaceholder} />
-                    )}
-                  </View>
-                  <View style={styles.findingBody}>
-                    <Text variant="labelMedium" style={styles.findingType}>
-                      {finding.type}
-                    </Text>
-                    <Text variant="bodySmall" style={styles.findingDesc}>
-                      {finding.description}
-                    </Text>
-                    {finding.location ? (
-                      <Text variant="labelSmall" style={styles.findingLocation}>
-                        {finding.location}
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* 8. Next Steps */}
-          <View style={styles.section}>
-            <SectionHeader title="Recommended Next Steps" />
-            <NextStepsPanel steps={analysis.nextSteps} />
-          </View>
-
-          {/* 9. Suggested professional (conditional) */}
-          {professionalLabel ? (
-            <View style={styles.section}>
-              <SectionHeader title="Suggested Professional" />
-              <View style={styles.proCard}>
-                <Text variant="bodyMedium" style={styles.proText}>
-                  Based on what I found, we recommend consulting a{' '}
-                  <Text style={styles.proHighlight}>{professionalLabel}</Text> for a thorough
-                  assessment.
+          {/* Gnome + headline */}
+          <View style={styles.resultHeader}>
+            <GnomeAvatar state={gnomeState} size={80} />
+            <View style={styles.titleWrap}>
+              <View style={styles.titleRow}>
+                <MaterialCommunityIcons name={titleIcon as never} size={20} color={titleColor} />
+                <Text style={[styles.resultTitle, { color: titleColor }]}>
+                  {analysis.likelyIssue}
                 </Text>
-                <Button
-                  mode="contained"
-                  buttonColor="#C41E3A"
-                  onPress={() => navigation.navigate('FindAPro', {})}
-                  contentStyle={styles.btnContent}
-                  style={styles.btn}
-                >
-                  Find a Professional
-                </Button>
               </View>
+              <Text variant="bodyMedium" style={styles.resultDesc}>
+                {analysis.description}
+              </Text>
             </View>
-          ) : null}
+          </View>
+
+          {/* Recommendations */}
+          <View style={styles.section}>
+            <Text variant="titleMedium" style={styles.recTitle}>
+              {analysis.recommendationTitle}
+            </Text>
+            {analysis.recommendations.map((rec, i) => (
+              <View key={i} style={styles.recRow}>
+                <MaterialCommunityIcons name="minus" size={16} color="#B0B0B0" style={styles.bullet} />
+                <Text variant="bodyMedium" style={styles.recText}>{rec}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Action buttons */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.btnRescan}
+              onPress={() => navigation.replace('StartScan', {
+                prefillLocation: scan?.location ?? undefined,
+                prefillNotes: scan?.notes ?? undefined,
+              })}
+              activeOpacity={0.85}
+            >
+              <Text variant="labelLarge" style={styles.btnRescanText}>Rescan Area</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnLearnMore}
+              onPress={() => navigation.navigate('DetailedResults', { inspectionId, riskLevel: analysis.riskLevel })}
+              activeOpacity={0.85}
+            >
+              <Text variant="labelLarge" style={styles.btnLearnMoreText}>Learn More</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
 
-      {/* 10. Disclaimer — always visible */}
-      <View style={styles.section}>
+      <View style={{ marginTop: spacing.xl }}>
         <DisclaimerBanner />
       </View>
     </ScreenContainer>
@@ -219,23 +173,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  metaLabel: {
-    color: '#888888',
-    marginBottom: 2,
-  },
-  metaValue: {
-    color: '#E0E0E0',
-    marginBottom: spacing.lg,
-  },
-  section: {
-    marginTop: spacing.xl,
-  },
   processingCard: {
     backgroundColor: '#1C1212',
     borderRadius: radii.lg,
     padding: spacing.xxl,
     alignItems: 'center',
     gap: spacing.md,
+    marginTop: spacing.lg,
   },
   processingTitle: {
     color: '#FFFFFF',
@@ -246,77 +190,78 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
-  likelyIssue: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    marginTop: spacing.xs,
-  },
-  gnomeRow: {
+  resultHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-    marginTop: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
   },
-  gnomeTipWrap: {
+  titleWrap: {
     flex: 1,
-  },
-  findingsCard: {
-    backgroundColor: '#1C1212',
-    borderRadius: radii.md,
-    overflow: 'hidden',
-  },
-  findingRow: {
-    flexDirection: 'row',
-    padding: spacing.md,
     gap: spacing.sm,
   },
-  findingDivider: {
-    borderTopWidth: 1,
-    borderTopColor: '#2A1A1A',
-  },
-  findingLeft: {
-    width: 16,
+  titleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 3,
+    gap: spacing.sm,
   },
-  dotPlaceholder: {
-    width: 10,
-    height: 10,
+  resultTitle: {
+    fontSize: 22,
+    fontWeight: '700',
   },
-  findingBody: {
-    flex: 1,
-    gap: 2,
-  },
-  findingType: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  findingDesc: {
-    color: '#B0B0B0',
-    lineHeight: 18,
-  },
-  findingLocation: {
-    color: '#666666',
-    marginTop: 2,
-  },
-  proCard: {
-    backgroundColor: '#1C1212',
-    borderRadius: radii.md,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  proText: {
+  resultDesc: {
     color: '#B0B0B0',
     lineHeight: 20,
   },
-  proHighlight: {
+  section: {
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  recTitle: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  recRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+  },
+  bullet: {
+    marginTop: 3,
+  },
+  recText: {
+    color: '#B0B0B0',
+    flex: 1,
+    lineHeight: 20,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  btnRescan: {
+    flex: 1,
+    backgroundColor: '#C41E3A',
+    borderRadius: radii.md,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+  btnRescanText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  btnLearnMore: {
+    flex: 1,
+    backgroundColor: '#1C1212',
+    borderRadius: radii.md,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#3A2020',
+  },
+  btnLearnMoreText: {
     color: '#FFFFFF',
     fontWeight: '600',
-  },
-  btn: {
-    borderRadius: radii.sm,
-  },
-  btnContent: {
-    paddingVertical: spacing.sm,
   },
 });

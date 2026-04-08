@@ -9,6 +9,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 import { ResultsScreen } from '../screens/ResultsScreen';
+import { DetailedResultsScreen } from '../screens/DetailedResultsScreen';
 import { FindAProScreen } from '../screens/FindAProScreen';
 import { CameraScreen } from '../screens/CameraScreen';
 import { StartScanScreen } from '../screens/StartScanScreen';
@@ -37,7 +38,12 @@ function MainNavigator() {
       <Main.Screen
         name="Results"
         component={ResultsScreen}
-        options={{ headerShown: true, title: 'Analysis Results', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+        options={{ headerShown: true, title: 'AI Analysis', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
+      />
+      <Main.Screen
+        name="DetailedResults"
+        component={DetailedResultsScreen}
+        options={{ headerShown: true, title: 'Scan Report', headerStyle: { backgroundColor: '#1A1A1A' }, headerTintColor: '#FFFFFF' }}
       />
       <Main.Screen
         name="FindAPro"

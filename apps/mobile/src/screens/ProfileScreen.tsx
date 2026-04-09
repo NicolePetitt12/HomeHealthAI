@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ScreenContainer, AppLogo } from '../components';
+import { ScreenContainer, AppLogo, SubscriptionCard, useDialog } from '../components';
 import { useAuth } from '../hooks/useAuth';
 import { spacing, radii } from '../theme';
 import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
@@ -13,12 +13,13 @@ type Props = MainTabScreenProps<'ProfileTab'>;
 
 export function ProfileScreen({ navigation }: Props) {
   const { user, signOut, deleteAccount } = useAuth();
+  const { showDialog } = useDialog();
 
   function handleDeleteAccount() {
-    Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account and all inspection data. This action cannot be undone.',
-      [
+    showDialog({
+      title: 'Delete Account',
+      message: 'This will permanently delete your account and all inspection data. This action cannot be undone.',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
@@ -28,12 +29,12 @@ export function ProfileScreen({ navigation }: Props) {
               await deleteAccount();
             } catch (err) {
               const msg = err instanceof Error ? err.message : String(err);
-              Alert.alert('Error', msg);
+              showDialog({ title: 'Error', message: msg });
             }
           },
         },
       ],
-    );
+    });
   }
 
   return (
@@ -51,6 +52,8 @@ export function ProfileScreen({ navigation }: Props) {
           </Text>
         </View>
       </View>
+
+      <SubscriptionCard onManagePlan={() => navigation.navigate('Subscription')} />
 
       <View style={styles.menu}>
         <TouchableOpacity onPress={() => navigation.navigate('HistoryTab')}>

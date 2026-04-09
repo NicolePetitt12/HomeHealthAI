@@ -292,23 +292,45 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // 1. Mark scan as processing
+  // 1. Enforce scan quota (server-side defense)
+  const SCAN_LIMITS: Record<string, number> = { free: 3, home: 20, pro: -1 };
+
+  const [{ data: planTier }, { data: scanCount }] = await Promise.all([
+    supabase.rpc('get_user_plan_tier', { p_user_id: scan.user_id }),
+    supabase.rpc('get_monthly_scan_count', { p_user_id: scan.user_id }),
+  ]);
+
+  const tier: string = planTier ?? 'free';
+  const count: number = scanCount ?? 0;
+  const limit = SCAN_LIMITS[tier] ?? 3;
+
+  // Note: the scan itself is already counted, so the current scan is included
+  // in the monthly count. We allow it if count <= limit (unlimited = -1).
+  if (limit !== -1 && count > limit) {
+    await supabase.from('scans').update({ status: 'failed' }).eq('id', scan.id);
+    return new Response(JSON.stringify({ error: 'Scan quota exceeded' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // 2. Mark scan as processing
   await supabase
     .from('scans')
     .update({ status: 'processing' })
     .eq('id', scan.id);
 
   try {
-    // 2. TODO: Get signed URL for the image to pass to LLM
+    // 3. TODO: Get signed URL for the image to pass to LLM
     // const { data: urlData } = await supabase.storage
     //   .from('scan-images')
     //   .createSignedUrl(scan.image_path, 60);
     // const imageUrl = urlData?.signedUrl;
 
-    // 3. Generate analysis (mock — replace with real LLM call)
+    // 4. Generate analysis (mock — replace with real LLM call)
     const analysis = generateMockAnalysis(scan.location);
 
-    // 4. Upsert analysis result (idempotent — safe if called multiple times for same scan)
+    // 5. Upsert analysis result (idempotent — safe if called multiple times for same scan)
     const { error: insertError } = await supabase.from('analysis_results').upsert(
       {
         scan_id: scan.id,
@@ -331,7 +353,7 @@ Deno.serve(async (req: Request) => {
 
     if (insertError) throw insertError;
 
-    // 5. Mark scan as completed
+    // 6. Mark scan as completed
     await supabase
       .from('scans')
       .update({ status: 'completed' })

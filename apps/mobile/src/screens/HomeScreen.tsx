@@ -13,6 +13,7 @@ import {
 import { spacing, radii } from '../theme';
 import { useMoldStatusCounts } from '../hooks/useMoldStatusCounts';
 import { useUserScans, type ScanWithResult } from '../hooks/useUserScans';
+import { useQuotaGate } from '../hooks/useQuotaGate';
 import { useAppDispatch } from '../store/hooks';
 import { setCurrentScan } from '../store/slices/inspectionSlice';
 import type { MainTabScreenProps } from '../navigation/types';
@@ -60,6 +61,7 @@ function MoldStatusSection() {
 export function HomeScreen({ navigation }: Props) {
   const dispatch = useAppDispatch();
   const { data: recentScans } = useUserScans(5);
+  const checkQuota = useQuotaGate();
 
   function handleViewAll() {
     navigation.navigate('HistoryTab');
@@ -92,7 +94,7 @@ export function HomeScreen({ navigation }: Props) {
 
       <TouchableOpacity
         style={styles.startScanBtn}
-        onPress={() => navigation.navigate('StartScan')}
+        onPress={() => checkQuota(() => navigation.navigate('StartScan'))}
         activeOpacity={0.85}
       >
         <MaterialCommunityIcons name="camera" size={20} color="#FFFFFF" />

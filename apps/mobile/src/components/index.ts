@@ -19,4 +19,6 @@ export { ProgressOverlay } from './ProgressOverlay';
 export { ConcernLevelCard } from './ConcernLevelCard';
 export { NextStepsPanel } from './NextStepsPanel';
 export { DisclaimerBanner } from './DisclaimerBanner';
+export { SubscriptionCard } from './SubscriptionCard';
+export { AppDialogProvider, useDialog } from './AppDialog';
 export type { GnomeState } from './GnomeAvatar';

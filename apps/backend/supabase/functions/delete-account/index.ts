@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import Stripe from 'stripe';
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -32,7 +33,33 @@ Deno.serve(async (req: Request) => {
   const userId = user.id;
 
   try {
-    // 1. Delete referrals for all of this user's scans
+    // 1. Cancel any active Stripe subscriptions and remove the customer record.
+    //    The customers table CASCADE handles subscriptions + invoices rows.
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (stripeKey) {
+      const { data: customerRow } = await admin
+        .from('customers')
+        .select('stripe_customer_id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+
+      if (customerRow?.stripe_customer_id) {
+        const stripe = new Stripe(stripeKey);
+        const subs = await stripe.subscriptions.list({
+          customer: customerRow.stripe_customer_id,
+          status: 'active',
+          limit: 10,
+        });
+        for (const sub of subs.data) {
+          await stripe.subscriptions.cancel(sub.id);
+        }
+      }
+    }
+
+    // Remove customer row (cascades to subscriptions + invoices)
+    await admin.from('customers').delete().eq('profile_id', userId);
+
+    // 3. Delete referrals for all of this user's scans
     const { data: userScans } = await admin
       .from('scans')
       .select('id')
@@ -44,10 +71,10 @@ Deno.serve(async (req: Request) => {
       await admin.from('analysis_results').delete().in('scan_id', scanIds);
     }
 
-    // 2. Delete referrals created directly by the user
+    // 4. Delete referrals created directly by the user
     await admin.from('referrals').delete().eq('user_id', userId);
 
-    // 3. Delete storage files in scan-images/{userId}/
+    // 5. Delete storage files in scan-images/{userId}/
     const { data: files } = await admin.storage
       .from('scan-images')
       .list(userId);
@@ -56,13 +83,13 @@ Deno.serve(async (req: Request) => {
       await admin.storage.from('scan-images').remove(paths);
     }
 
-    // 4. Delete scans
+    // 6. Delete scans
     await admin.from('scans').delete().eq('user_id', userId);
 
-    // 5. Delete profile
+    // 7. Delete profile
     await admin.from('profiles').delete().eq('id', userId);
 
-    // 6. Delete auth user (requires service role)
+    // 8. Delete auth user (requires service role)
     const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
     if (deleteError) throw deleteError;
 

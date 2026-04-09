@@ -39,6 +39,9 @@ export function useSubmitScan(onProgress: (p: SubmitProgress) => void) {
       onProgressRef.current({ stage: 'creating', percent: 80 });
       const scan = await createScanRecord(user.id, storagePath, location, notes);
 
+      // Invalidate entitlement immediately so the scan counter reflects the new scan.
+      queryClient.invalidateQueries({ queryKey: ['entitlement'] });
+
       // Directly invoke the Edge Function so analysis is stored in DB immediately.
       // After it completes, invalidate the home screen queries so counts and
       // recent inspections refresh automatically.
@@ -46,6 +49,7 @@ export function useSubmitScan(onProgress: (p: SubmitProgress) => void) {
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ['user-scans'] });
           queryClient.invalidateQueries({ queryKey: ['mold-status-counts'] });
+          queryClient.invalidateQueries({ queryKey: ['entitlement'] });
         })
         .catch(console.error);
 

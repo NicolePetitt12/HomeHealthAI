@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import { ScreenContainer } from '../components';
+import { ScreenContainer, useDialog } from '../components';
 import { spacing, radii } from '../theme';
+import { useQuotaGate } from '../hooks/useQuotaGate';
 import type { MainStackScreenProps } from '../navigation/types';
 
 type Props = MainStackScreenProps<'StartScan'>;
@@ -13,28 +14,31 @@ type Props = MainStackScreenProps<'StartScan'>;
 export function StartScanScreen({ navigation, route }: Props) {
   const prefillLocation = route.params?.prefillLocation;
   const prefillNotes = route.params?.prefillNotes;
+  const checkQuota = useQuotaGate();
+  const { showDialog } = useDialog();
 
   function handleCamera() {
-    navigation.navigate('Camera');
+    checkQuota(() => navigation.navigate('Camera'));
   }
 
   async function handleUpload() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Inspector Gnome needs access to your photos to upload images.',
-        [{ text: 'OK' }],
-      );
+      showDialog({
+        title: 'Permission Required',
+        message: 'Inspector Gnome needs access to your photos to upload images.',
+      });
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      quality: 0.8,
+    checkQuota(async () => {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets[0]) {
+        navigation.replace('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery', prefillLocation, prefillNotes });
+      }
     });
-    if (!result.canceled && result.assets[0]) {
-      navigation.replace('PhotoReview', { imageUri: result.assets[0].uri, source: 'gallery', prefillLocation, prefillNotes });
-    }
   }
 
   return (

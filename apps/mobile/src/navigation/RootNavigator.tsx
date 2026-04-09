@@ -17,6 +17,7 @@ import { StartScanScreen } from '../screens/StartScanScreen';
 import { PhotoReviewScreen } from '../screens/PhotoReviewScreen';
 import { LegalScreen } from '../screens/LegalScreen';
 import { ComingSoonScreen } from '../screens/ComingSoonScreen';
+import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import type { RootStackParamList, MainStackParamList } from './types';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
@@ -85,6 +86,16 @@ function MainNavigator() {
           headerStyle: { backgroundColor: '#1A1A1A' },
           headerTintColor: '#FFFFFF',
         })}
+      />
+      <Main.Screen
+        name="Subscription"
+        component={SubscriptionScreen}
+        options={{
+          headerShown: true,
+          title: 'Plans',
+          headerStyle: { backgroundColor: '#1A1A1A' },
+          headerTintColor: '#FFFFFF',
+        }}
       />
     </Main.Navigator>
   );

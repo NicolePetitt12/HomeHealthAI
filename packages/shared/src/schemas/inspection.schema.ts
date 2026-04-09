@@ -130,3 +130,92 @@ export const CreateReferralSchema = ReferralSchema.pick({
   message: true,
 });
 export type CreateReferral = z.infer<typeof CreateReferralSchema>;
+
+// ----- Subscription Enums -----
+
+export const SubscriptionStatus = z.enum([
+  'trialing',
+  'active',
+  'past_due',
+  'canceled',
+  'unpaid',
+  'incomplete',
+  'incomplete_expired',
+  'paused',
+]);
+export type SubscriptionStatus = z.infer<typeof SubscriptionStatus>;
+
+export const PlanTier = z.enum(['free', 'home', 'pro']);
+export type PlanTier = z.infer<typeof PlanTier>;
+
+// ----- Customer -----
+
+export const CustomerSchema = z.object({
+  id: z.string().uuid(),
+  profileId: z.string().uuid(),
+  stripeCustomerId: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type Customer = z.infer<typeof CustomerSchema>;
+
+// ----- Subscription -----
+
+export const SubscriptionSchema = z.object({
+  id: z.string().uuid(),
+  customerId: z.string().uuid(),
+  stripeSubscriptionId: z.string(),
+  stripePriceId: z.string(),
+  planTier: PlanTier,
+  status: SubscriptionStatus,
+  currentPeriodStart: z.string().datetime().nullable(),
+  currentPeriodEnd: z.string().datetime().nullable(),
+  cancelAtPeriodEnd: z.boolean(),
+  canceledAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type Subscription = z.infer<typeof SubscriptionSchema>;
+
+// ----- Invoice -----
+
+export const InvoiceSchema = z.object({
+  id: z.string().uuid(),
+  customerId: z.string().uuid(),
+  stripeInvoiceId: z.string(),
+  stripeSubscriptionId: z.string().nullable(),
+  amountPaid: z.number(),
+  currency: z.string(),
+  status: z.string(),
+  invoiceUrl: z.string().nullable(),
+  periodStart: z.string().datetime().nullable(),
+  periodEnd: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type Invoice = z.infer<typeof InvoiceSchema>;
+
+// ----- Plan (returned by get-plans Edge Function) -----
+
+export const PlanSchema = z.object({
+  appPlanId: z.enum(['home', 'pro']),
+  name: z.string(),
+  description: z.string(),
+  priceId: z.string(),
+  unitAmount: z.number(),
+  currency: z.string(),
+  interval: z.string(),
+});
+export type Plan = z.infer<typeof PlanSchema>;
+
+// ----- Entitlement (derived, not persisted) -----
+
+export const EntitlementSchema = z.object({
+  planTier: PlanTier,
+  scansUsedThisMonth: z.number(),
+  scansAllowedThisMonth: z.number(), // -1 = unlimited
+  canScan: z.boolean(),
+  subscriptionStatus: SubscriptionStatus.nullable(),
+  currentPeriodEnd: z.string().datetime().nullable(),
+  cancelAtPeriodEnd: z.boolean(),
+});
+export type Entitlement = z.infer<typeof EntitlementSchema>;

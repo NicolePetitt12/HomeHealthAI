@@ -7,9 +7,8 @@ A mobile application that helps homeowners identify potential mold and moisture 
 | Layer | Technology |
 |-------|-----------|
 | Mobile | React Native (Expo), Redux Toolkit, React Query, React Native Paper |
-| Backend | NestJS, TypeScript, Zod |
-| Database & Auth | Supabase (PostgreSQL), Row Level Security |
-| Storage | Supabase Storage |
+| Backend | Supabase (Edge Functions, PostgreSQL, Storage) |
+| Payments | Stripe (subscriptions, native Payment Sheet) |
 | Monorepo | Turborepo + npm workspaces |
 
 ---
@@ -19,7 +18,9 @@ A mobile application that helps homeowners identify potential mold and moisture 
 - **Node.js** >= 20 (`node --version`)
 - **npm** >= 10 (`npm --version`)
 - **Docker** (required for local Supabase) — [Install Docker](https://docs.docker.com/get-docker/)
-- **Expo Go** app on your phone or an Android/iOS emulator (for mobile development)
+- **Android Studio** or **Xcode** — required to build the app (Expo Go is not supported because the app uses native Stripe modules)
+- **Stripe account** — [dashboard.stripe.com](https://dashboard.stripe.com) (free test mode is enough)
+- **Stripe CLI** (optional, for local webhook testing) — [Install Stripe CLI](https://stripe.com/docs/stripe-cli)
 
 ---
 
@@ -32,11 +33,7 @@ cd inspector-gnome
 npm install
 ```
 
-This installs all dependencies across all workspace packages.
-
 ### 2. Build the shared package
-
-The shared types package must be built before the backend or mobile app can use it:
 
 ```bash
 cd packages/shared && npm run build && cd ../..
@@ -47,63 +44,87 @@ cd packages/shared && npm run build && cd ../..
 ```bash
 cd apps/backend
 npx supabase start
-```
-
-After it starts, run `npx supabase status` to get your local keys:
-
-```
-API URL: http://127.0.0.1:54321
-Publishable: sb_publishable_...    ← SUPABASE_ANON_KEY
-Secret:      sb_secret_...         ← SUPABASE_SERVICE_ROLE_KEY
+npx supabase status   # copy the keys shown here
 ```
 
 ### 4. Configure environment variables
 
-**Backend:**
-```bash
-cp apps/backend/.env.example apps/backend/.env
-# Edit apps/backend/.env and fill in the keys from supabase status
-```
-
-**Mobile:**
+**Mobile** (`apps/mobile/.env`):
 ```bash
 cp apps/mobile/.env.example apps/mobile/.env
-# Edit apps/mobile/.env and fill in the anon key from supabase status
 ```
 
-See [Environment Variables](documentation/development.md#environment-variables) for the full reference.
+| Variable | Where to get it |
+|----------|-----------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | `supabase status` → API URL (use LAN IP, not 127.0.0.1) |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | `supabase status` → Publishable key |
+| `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → Developers → API keys → Publishable key |
 
-### 5. Run database migrations and seed data
+**Edge Functions** (`apps/backend/supabase/functions/.env`):
+```bash
+cp apps/backend/supabase/functions/.env.example apps/backend/supabase/functions/.env
+```
+
+| Variable | Where to get it |
+|----------|-----------------|
+| `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → Secret key |
+| `STRIPE_WEBHOOK_SECRET` | Output of `stripe-setup` (step 7 below) |
+| `WEBHOOK_BASE_URL` | Your public Supabase URL (e.g. `https://hhai.subacuatica.com.mx`) |
+
+### 5. Run database migrations
 
 ```bash
 cd apps/backend
 npx supabase db reset
 ```
 
-This applies all migrations and loads seed data with test accounts.
+This applies all migrations and loads test data.
 
-### 6. Start the backend
+### 6. Start Edge Functions
 
 ```bash
 cd apps/backend
-npm run start:dev
+npx supabase functions serve --env-file supabase/functions/.env
 ```
 
-The API is available at `http://localhost:3000/api`. Verify with:
+Keep this running in a terminal while developing.
+
+### 7. Configure Stripe (one-time setup)
+
+Run the idempotent setup function to create products, prices, and the webhook endpoint in your Stripe account:
 
 ```bash
-curl http://localhost:3000/api/health
-# → {"status":"ok","timestamp":"..."}
+curl -X POST http://127.0.0.1:54321/functions/v1/stripe-setup
 ```
 
-### 7. Start the mobile app
+Copy the `webhook.secret` from the output into `apps/backend/supabase/functions/.env`:
+```
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+Then restart Edge Functions (Ctrl+C and re-run step 6).
+
+### 8. (Optional) Forward Stripe webhooks locally
+
+In a separate terminal, use the Stripe CLI to forward events to your local function:
+
+```bash
+stripe listen --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+```
+
+### 9. Build and run the mobile app
+
+> **Note:** The app uses `@stripe/stripe-react-native` which requires native code — Expo Go is not supported.
 
 ```bash
 cd apps/mobile
-npx expo start
-```
 
-Scan the QR code with Expo Go on your phone, or press `a` for Android emulator / `i` for iOS simulator.
+# Android (requires Android Studio + emulator or device)
+npx expo run:android
+
+# iOS (requires Xcode, macOS only)
+npx expo run:ios
+```
 
 ---
 
@@ -112,15 +133,17 @@ Scan the QR code with Expo Go on your phone, or press `a` for Android emulator /
 ```
 inspector-gnome/
 ├── apps/
-│   ├── backend/         NestJS REST API + Supabase local config
-│   │   └── supabase/    Migrations, seed data, config
-│   └── mobile/          Expo React Native app
+│   ├── backend/              Supabase local config + Edge Functions
+│   │   └── supabase/
+│   │       ├── functions/    Edge Functions (Deno TypeScript)
+│   │       ├── migrations/   SQL migrations
+│   │       └── seed.sql      Test data
+│   └── mobile/               Expo React Native app
 ├── packages/
-│   └── shared/          Shared Zod schemas and TypeScript types
-├── documentation/       Detailed developer documentation
-├── CLAUDE.md            AI assistant context file
-├── turbo.json           Turborepo pipeline config
-└── package.json         Workspace root
+│   └── shared/               Shared Zod schemas and TypeScript types
+├── documentation/            Detailed developer documentation
+├── CLAUDE.md                 AI assistant context file
+└── turbo.json                Turborepo pipeline config
 ```
 
 ---
@@ -134,9 +157,7 @@ Run from the **workspace root** (`inspector-gnome/`):
 | `npm run dev` | Start all packages in parallel (watch mode) |
 | `npm run build` | Build all packages |
 | `npm run lint` | Lint all packages |
-| `npm run test` | Run all tests |
 | `npm run format` | Format all files with Prettier |
-| `npm run format:check` | Check formatting without writing |
 
 ---
 
@@ -149,14 +170,25 @@ After running `npx supabase db reset`:
 | Homeowner | `homeowner@test.com` | `password123` |
 | Professional | `pro@test.com` | `password123` |
 
+**Stripe test card:** `4242 4242 4242 4242` — any future expiry date, any CVC.
+
+---
+
+## Subscription Plans
+
+| Plan | Price | Scans/month |
+|------|-------|-------------|
+| Free | $0 | 3 |
+| Home | $9.99/mo | 20 |
+| Pro | $29.99/mo | Unlimited |
+
 ---
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [Architecture](documentation/architecture.md) | System architecture, data flow diagrams, tech stack |
-| [Database](documentation/database.md) | Schema, RLS policies, ER diagram, storage |
-| [Development Guide](documentation/development.md) | Env setup, running services, ports reference |
-| [Migrations](documentation/migrations.md) | Creating and applying DB migrations, seed data |
+| [Development Guide](documentation/development.md) | Full env setup, running services, Stripe configuration |
+| [Database](documentation/database.md) | Schema, RLS policies, ER diagram |
+| [Migrations](documentation/migrations.md) | Creating and applying DB migrations |
 | [Testing](documentation/testing.md) | Running tests, linting, type checking |

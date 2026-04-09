@@ -72,6 +72,43 @@ erDiagram
         timestamptz updated_at
     }
 
+    customers {
+        uuid id PK
+        uuid profile_id FK
+        text stripe_customer_id
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    subscriptions {
+        uuid id PK
+        uuid customer_id FK
+        text stripe_subscription_id
+        text stripe_price_id
+        plan_tier plan_tier
+        subscription_status status
+        timestamptz current_period_start
+        timestamptz current_period_end
+        boolean cancel_at_period_end
+        timestamptz canceled_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    invoices {
+        uuid id PK
+        uuid customer_id FK
+        text stripe_invoice_id
+        text stripe_subscription_id
+        integer amount_paid
+        text currency
+        text status
+        text invoice_url
+        timestamptz period_start
+        timestamptz period_end
+        timestamptz created_at
+    }
+
     auth_users ||--|| profiles : "triggers auto-create"
     profiles ||--o{ scans : "user_id"
     scans ||--o| analysis_results : "scan_id"
@@ -79,6 +116,9 @@ erDiagram
     professionals ||--o{ referrals : "professional_id"
     scans ||--o{ referrals : "scan_id"
     profiles ||--o| professionals : "user_id (nullable)"
+    profiles ||--o| customers : "profile_id (1:1)"
+    customers ||--o{ subscriptions : "customer_id"
+    customers ||--o{ invoices : "customer_id"
 ```
 
 ## Tables
@@ -138,6 +178,39 @@ Connects a user's scan to a professional.
 | `status` | `text` | `pending`, `accepted`, `declined`, `completed` |
 | `message` | `text` | Optional message from the user to the professional |
 
+### `customers`
+Links a Supabase profile to a Stripe customer. Created on the user's first checkout attempt.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `profile_id` | `uuid` | FK → `profiles.id` (UNIQUE — one Stripe customer per user) |
+| `stripe_customer_id` | `text` | Stripe's `cus_...` identifier |
+
+### `subscriptions`
+The current subscription state for a customer. All plan changes and status transitions are reflected here via Stripe webhooks.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `customer_id` | `uuid` | FK → `customers.id` |
+| `stripe_subscription_id` | `text` | Stripe's `sub_...` identifier (UNIQUE) |
+| `stripe_price_id` | `text` | Stripe price associated with this subscription |
+| `plan_tier` | `plan_tier` | `free`, `home`, or `pro` — derived from price metadata |
+| `status` | `subscription_status` | See enum below |
+| `current_period_end` | `timestamptz` | Next billing date (or cancellation date) |
+| `cancel_at_period_end` | `boolean` | `true` if the user has requested cancellation |
+
+### `invoices`
+Append-only record of all payments. Written exclusively by the `stripe-webhook` Edge Function.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `customer_id` | `uuid` | FK → `customers.id` |
+| `amount_paid` | `integer` | Amount in cents (e.g. `999` = $9.99) |
+| `status` | `text` | `paid`, `open`, `void`, or `uncollectible` |
+| `invoice_url` | `text` | Stripe-hosted invoice URL for the user |
+
+---
+
 ## Enum Types
 
 | Enum | Values |
@@ -146,6 +219,8 @@ Connects a user's scan to a professional.
 | `user_role` | `homeowner`, `property_manager`, `renter`, `professional` |
 | `scan_status` | `pending`, `processing`, `completed`, `failed` |
 | `professional_type` | `inspector`, `remediation`, `plumber`, `hvac` |
+| `plan_tier` | `free`, `home`, `pro` |
+| `subscription_status` | `trialing`, `active`, `past_due`, `canceled`, `unpaid`, `incomplete`, `incomplete_expired`, `paused` |
 
 ## Storage
 
@@ -174,6 +249,9 @@ All tables have RLS enabled. **Edge Functions use the service role key** (bypass
 | `analysis_results` | Users can view results for their own scans; INSERT is service-role only |
 | `professionals` | All authenticated users can view the directory; professionals can update their own listing |
 | `referrals` | Users can view/create their own referrals; professionals can view/update referrals directed to them |
+| `customers` | Users can SELECT their own row only; all writes are service-role only |
+| `subscriptions` | Users can SELECT their own subscriptions (via customers join); all writes are service-role only |
+| `invoices` | Users can SELECT their own invoices (via customers join); all writes are service-role only |
 
 **Storage RLS:** Users can upload, view, and delete files only within their own `{user_id}/` folder.
 

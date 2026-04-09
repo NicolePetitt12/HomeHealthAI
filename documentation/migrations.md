@@ -10,6 +10,9 @@ All migrations are managed with the Supabase CLI and live in `apps/backend/supab
 | `20260324224738_create_rls_policies.sql` | Enables RLS and creates all row-level security policies |
 | `20260324224800_create_storage_buckets.sql` | Creates the `scan-images` storage bucket and storage policies |
 | `20260406000000_create_analyze_scan_webhook.sql` | Adds `pg_net` trigger on `scans` INSERT to fire `analyze-scan` Edge Function |
+| `20260409011720_create_subscription_tables.sql` | Adds `customers`, `subscriptions`, `invoices` tables; `plan_tier` and `subscription_status` enums; `get_user_plan_tier` and `get_monthly_scan_count` SQL functions |
+| `20260409120000_fix_monthly_scan_count.sql` | Excludes failed scans from `get_monthly_scan_count` quota calculation |
+| `20260409124110_billing_period_scan_count.sql` | Rewrites `get_monthly_scan_count` to use billing period start instead of calendar month |
 
 ## Applying Migrations
 

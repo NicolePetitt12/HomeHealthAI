@@ -187,7 +187,7 @@ Links a Supabase profile to a Stripe customer. Created on the user's first check
 | `stripe_customer_id` | `text` | Stripe's `cus_...` identifier |
 
 ### `subscriptions`
-The current subscription state for a customer. All plan changes and status transitions are reflected here via Stripe webhooks.
+The current subscription state for a customer. All plan changes and status transitions are reflected here via Stripe webhooks — the app never writes to this table directly.
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -196,8 +196,10 @@ The current subscription state for a customer. All plan changes and status trans
 | `stripe_price_id` | `text` | Stripe price associated with this subscription |
 | `plan_tier` | `plan_tier` | `free`, `home`, or `pro` — derived from price metadata |
 | `status` | `subscription_status` | See enum below |
-| `current_period_end` | `timestamptz` | Next billing date (or cancellation date) |
-| `cancel_at_period_end` | `boolean` | `true` if the user has requested cancellation |
+| `current_period_start` | `timestamptz` | Start of the current billing period — **used as the scan quota window start** |
+| `current_period_end` | `timestamptz` | End of the current billing period (next billing date or cancellation date) |
+| `cancel_at_period_end` | `boolean` | `true` if the user has requested cancellation; access continues until `current_period_end` |
+| `canceled_at` | `timestamptz` | When the cancellation was requested (not when access ends) |
 
 ### `invoices`
 Append-only record of all payments. Written exclusively by the `stripe-webhook` Edge Function.
@@ -254,6 +256,33 @@ All tables have RLS enabled. **Edge Functions use the service role key** (bypass
 | `invoices` | Users can SELECT their own invoices (via customers join); all writes are service-role only |
 
 **Storage RLS:** Users can upload, view, and delete files only within their own `{user_id}/` folder.
+
+## SQL Functions
+
+### `get_monthly_scan_count(p_user_id uuid) → integer`
+
+Returns the number of non-failed scans in the user's **current billing period**. The window is determined differently per plan type:
+
+| User type | Window start | Window end |
+|-----------|-------------|------------|
+| Paid (`home` / `pro`) | `subscriptions.current_period_start` | + 1 month |
+| Free | Monthly "anniversary" of `profiles.created_at` | + 1 month |
+
+**Free user example:** account created March 20 → current period = April 20 – May 19 (on April 25).
+
+Failed scans (`status = 'failed'`) are excluded — they did not produce an analysis result and should not consume quota.
+
+> This function is called by both `get-entitlement` (client-facing quota display) and `analyze-scan` (server-side quota enforcement before running AI analysis).
+
+### `get_user_plan_tier(p_user_id uuid) → plan_tier`
+
+Returns the user's current plan tier (`free`, `home`, or `pro`) by looking up their most recent active subscription. Returns `'free'` if no active subscription exists.
+
+Active statuses: `active`, `trialing`.
+
+### `handle_new_user() → trigger`
+
+Called by the `on_auth_user_created` trigger. Creates a `profiles` row for every new `auth.users` insert, copying `id`, `email`, `full_name`, and `avatar_url` from the auth record.
 
 ## Triggers
 

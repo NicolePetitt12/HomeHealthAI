@@ -176,11 +176,17 @@ After running `npx supabase db reset`:
 
 ## Subscription Plans
 
-| Plan | Price | Scans/month |
+| Plan | Price | Scans/period |
 |------|-------|-------------|
 | Free | $0 | 3 |
 | Home | $9.99/mo | 20 |
 | Pro | $29.99/mo | Unlimited |
+
+Scan quotas reset at the start of each **billing period**, not at the calendar month boundary:
+- **Paid plans** — period starts on the date Stripe last renewed (e.g. subscribed April 15 → resets every 15th)
+- **Free plan** — rolling monthly window anchored to account creation date
+
+Plan changes (upgrades and downgrades) are prorated automatically: users are charged or credited for unused days in the current period.
 
 ---
 

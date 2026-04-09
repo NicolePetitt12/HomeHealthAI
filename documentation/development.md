@@ -204,8 +204,10 @@ Use any future expiry date and any 3-digit CVC.
 | `stripe-setup` | None | One-time Stripe product/price/webhook configuration |
 | `stripe-webhook` | None (Stripe signature) | Handles Stripe events, updates subscription tables |
 | `get-plans` | None | Returns available plans with Stripe price IDs |
-| `get-entitlement` | User JWT | Returns current plan tier and scan quota |
-| `create-payment-sheet` | User JWT | Creates subscription + returns Payment Sheet params |
+| `get-entitlement` | User JWT | Returns current plan tier, scan quota, and billing period dates |
+| `create-payment-sheet` | User JWT | Creates new subscription + returns Payment Sheet params (Free → Paid) |
+| `change-subscription` | User JWT | Prorated upgrade/downgrade between paid plans; no Payment Sheet needed |
+| `cancel-subscription` | User JWT | Sets `cancel_at_period_end = true`; access continues until period end |
 | `create-portal-session` | User JWT | Creates Stripe Customer Portal session URL |
 | `analyze-scan` | None (internal trigger) | AI mold analysis, called via pg_net trigger |
 | `delete-account` | User JWT | Cancels Stripe subscription and deletes all user data |

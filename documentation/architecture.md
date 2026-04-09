@@ -58,6 +58,111 @@ sequenceDiagram
     Mobile->>User: Display risk level + findings + next steps
 ```
 
+## Data Flow — Subscription Lifecycle
+
+### New Subscription (Free → Paid)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Mobile as Mobile App
+    participant Sheet as Stripe Payment Sheet
+    participant BE as Edge Function<br/>create-payment-sheet
+    participant Stripe
+    participant WH as Edge Function<br/>stripe-webhook
+    participant DB as PostgreSQL
+
+    User->>Mobile: Tap "Get started" on Home/Pro plan
+    Mobile->>BE: POST /create-payment-sheet { priceId }
+    BE->>Stripe: Create subscription + ephemeral key
+    BE-->>Mobile: { clientSecret, ephemeralKey, customerId }
+    Mobile->>Sheet: Present native Payment Sheet
+    User->>Sheet: Enter card details & confirm
+    Sheet->>Stripe: Process payment
+    Stripe-->>Mobile: Payment result
+    Mobile->>DB: invalidateQueries (poll every 3s)
+    Stripe->>WH: checkout.session.completed
+    WH->>DB: UPSERT customers (profile_id → stripe_customer_id)
+    Stripe->>WH: customer.subscription.created
+    WH->>DB: UPSERT subscriptions (plan_tier, status, period dates)
+    DB-->>Mobile: entitlement updated → UI reflects new plan
+```
+
+### Upgrade / Downgrade (Paid → Paid)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Mobile as Mobile App
+    participant FN as Edge Function<br/>change-subscription
+    participant Stripe
+    participant WH as Edge Function<br/>stripe-webhook
+    participant DB as PostgreSQL
+
+    User->>Mobile: Tap "Upgrade" or "Downgrade"
+    Mobile->>FN: POST /change-subscription { priceId }
+    Note over FN: Looks up active sub in DB<br/>Calls stripe.subscriptions.update()<br/>proration_behavior: always_invoice
+    FN->>Stripe: Update subscription items
+    Stripe-->>FN: Updated subscription
+    FN-->>Mobile: { success: true }
+    Mobile->>Mobile: Show "Processing…" banner<br/>Poll entitlement every 3s
+    Stripe->>WH: customer.subscription.updated
+    WH->>DB: UPSERT subscriptions (new plan_tier, new period)
+    Stripe->>WH: invoice.payment_succeeded (proration charge/credit)
+    WH->>DB: UPSERT invoices
+    DB-->>Mobile: entitlement.planTier changed → banner auto-hides
+```
+
+### Cancel to Free
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Mobile as Mobile App
+    participant FN as Edge Function<br/>cancel-subscription
+    participant Stripe
+    participant WH as Edge Function<br/>stripe-webhook
+    participant DB as PostgreSQL
+
+    User->>Mobile: Tap "Downgrade to Free"
+    Mobile->>Mobile: Show confirmation dialog
+    User->>Mobile: Confirm downgrade
+    Mobile->>FN: POST /cancel-subscription
+    FN->>Stripe: subscriptions.update({ cancel_at_period_end: true })
+    Stripe-->>FN: { currentPeriodEnd }
+    FN-->>Mobile: { success, currentPeriodEnd }
+    Mobile->>Mobile: Show "Access until <date>" dialog
+    Stripe->>WH: customer.subscription.updated
+    WH->>DB: subscriptions.cancel_at_period_end = true
+    Note over DB,Mobile: User stays on paid plan until period end<br/>Free card shows "Cancellation pending"
+    Note over Stripe,WH: On period end, Stripe fires subscription.deleted
+    WH->>DB: subscriptions.status = 'canceled', plan_tier = 'free'
+```
+
+## Scan Quota System
+
+```mermaid
+flowchart TD
+    A[User taps Start Scan] --> B{checkQuota}
+    B -->|canScan = true| C[Proceed to camera]
+    B -->|canScan = false| D[Show quota dialog]
+    D --> E[Navigate to Subscription screen]
+
+    C --> F[Photo uploaded + scan inserted]
+    F --> G[analyze-scan triggered]
+    G --> H{Server-side quota check<br/>get_monthly_scan_count}
+    H -->|within limit| I[Run AI analysis]
+    H -->|exceeded| J[Mark scan as failed<br/>Return 403]
+
+    subgraph Quota Window
+        K{Plan type?}
+        K -->|Paid| L[current_period_start<br/>from Stripe webhook]
+        K -->|Free| M[Monthly anniversary<br/>of profiles.created_at]
+        L --> N[Count non-failed scans<br/>in window]
+        M --> N
+    end
+```
+
 ## Monorepo Package Relationships
 
 ```mermaid
@@ -92,11 +197,20 @@ Navigation stack: **Home → Camera → PhotoReview → Results** / **History**
 
 ### Edge Functions (`apps/backend/supabase/functions/`)
 
+Written in **Deno TypeScript**. Uses the `SUPABASE_SERVICE_ROLE_KEY` env var (auto-injected) to bypass RLS when writing results or querying subscription data.
+
 | Function | Trigger | Role |
 |----------|---------|------|
 | `analyze-scan` | `on_scan_created` Postgres trigger (pg_net) | Runs AI analysis, writes `analysis_results` |
-
-Written in **Deno TypeScript**. Uses the `SUPABASE_SERVICE_ROLE_KEY` env var (auto-injected) to bypass RLS when writing analysis results.
+| `stripe-webhook` | Stripe HTTP POST | Receives Stripe events, syncs `subscriptions` and `invoices` tables |
+| `get-entitlement` | User request | Returns plan tier, scan quota used/allowed, and billing period dates |
+| `get-plans` | User request | Returns available paid plans with Stripe price IDs |
+| `create-payment-sheet` | User request | Creates a new Stripe subscription + returns Payment Sheet parameters |
+| `change-subscription` | User request | Prorated plan upgrade/downgrade on an existing subscription |
+| `cancel-subscription` | User request | Schedules subscription cancellation at period end |
+| `create-portal-session` | User request | Returns a Stripe Customer Portal URL for billing management |
+| `stripe-setup` | Manual (one-time) | Creates Stripe products, prices, and webhook endpoint |
+| `delete-account` | User request | Cancels Stripe subscription and purges all user data |
 
 To create a Supabase client in an Edge Function:
 ```typescript

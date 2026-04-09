@@ -28,7 +28,11 @@ export function CameraScreen({ navigation }: Props) {
   }
 
   if (!permission) {
-    return <AppBackground><View style={styles.container} /></AppBackground>;
+    return (
+      <AppBackground>
+        <View style={styles.container} />
+      </AppBackground>
+    );
   }
 
   if (!permission.granted) {
@@ -36,12 +40,16 @@ export function CameraScreen({ navigation }: Props) {
       <AppBackground>
         <View style={styles.container}>
           <GnomeAvatar state="idle" size={100} />
-          <Text variant="titleMedium" style={styles.permText}>Camera access needed</Text>
+          <Text variant="titleMedium" style={styles.permText}>
+            Camera access needed
+          </Text>
           <Text variant="bodySmall" style={styles.permSub}>
             Inspector Gnome needs your camera to scan areas for mold and moisture.
           </Text>
           <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
-            <Text variant="labelLarge" style={styles.permBtnText}>Allow Camera</Text>
+            <Text variant="labelLarge" style={styles.permBtnText}>
+              Allow Camera
+            </Text>
           </TouchableOpacity>
         </View>
       </AppBackground>
@@ -59,7 +67,9 @@ export function CameraScreen({ navigation }: Props) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
           <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text variant="titleSmall" style={styles.topTitle}>New Inspection</Text>
+        <Text variant="titleSmall" style={styles.topTitle}>
+          New Inspection
+        </Text>
         <View style={styles.closeBtn} />
       </View>
 

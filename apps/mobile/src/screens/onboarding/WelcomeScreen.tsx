@@ -11,27 +11,27 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
 export function WelcomeScreen({ navigation }: Props) {
   return (
     <AppBackground>
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <GnomeAvatar state="idle" size={120} />
-        <Text variant="headlineMedium" style={styles.title}>
-          Welcome to Inspector Gnome
-        </Text>
-        <Text variant="bodyLarge" style={styles.subtitle}>
-          Your AI-powered home health assistant. Detect mold and moisture issues
-          before they become costly problems.
-        </Text>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <GnomeAvatar state="idle" size={200} />
+          <Text variant="headlineMedium" style={styles.title}>
+            Welcome to Inspector Gnome
+          </Text>
+          <Text variant="bodyLarge" style={styles.subtitle}>
+            Your AI-powered home health assistant. Detect mold and moisture issues before they
+            become costly problems.
+          </Text>
+        </View>
+        <Button
+          mode="contained"
+          buttonColor="#C41E3A"
+          onPress={() => navigation.navigate('Features')}
+          style={styles.button}
+          contentStyle={styles.buttonContent}
+        >
+          Get Started
+        </Button>
       </View>
-      <Button
-        mode="contained"
-        buttonColor="#C41E3A"
-        onPress={() => navigation.navigate('Features')}
-        style={styles.button}
-        contentStyle={styles.buttonContent}
-      >
-        Get Started
-      </Button>
-    </View>
     </AppBackground>
   );
 }

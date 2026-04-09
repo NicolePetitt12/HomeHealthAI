@@ -27,46 +27,47 @@ export function PermissionsScreen(_: Props) {
 
   return (
     <AppBackground>
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <GnomeAvatar state="analyzing" size={110} />
-        <Text variant="headlineMedium" style={styles.title}>Camera Access</Text>
-        <Text variant="bodyLarge" style={styles.body}>
-          Inspector Gnome needs access to your camera to photograph areas you want
-          analyzed. Your photos are processed securely and never shared without your
-          permission.
-        </Text>
-        {granted && (
-          <Text variant="bodyMedium" style={styles.granted}>
-            ✅ Camera access granted
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <GnomeAvatar state="analyzing" size={200} />
+          <Text variant="headlineMedium" style={styles.title}>
+            Camera Access
           </Text>
-        )}
-      </View>
+          <Text variant="bodyLarge" style={styles.body}>
+            Inspector Gnome needs access to your camera to photograph areas you want analyzed. Your
+            photos are processed securely and never shared without your permission.
+          </Text>
+          {granted && (
+            <Text variant="bodyMedium" style={styles.granted}>
+              ✅ Camera access granted
+            </Text>
+          )}
+        </View>
 
-      <View style={styles.actions}>
-        {!granted && (
+        <View style={styles.actions}>
+          {!granted && (
+            <Button
+              mode="contained"
+              buttonColor="#C41E3A"
+              onPress={handleAllow}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
+            >
+              Allow Camera Access
+            </Button>
+          )}
           <Button
-            mode="contained"
-            buttonColor="#C41E3A"
-            onPress={handleAllow}
-            style={styles.button}
+            mode={granted ? 'contained' : 'outlined'}
+            buttonColor={granted ? '#C41E3A' : undefined}
+            textColor={granted ? '#FFFFFF' : '#C41E3A'}
+            onPress={finish}
+            style={[styles.button, !granted && styles.outlinedButton]}
             contentStyle={styles.buttonContent}
           >
-            Allow Camera Access
+            {granted ? 'Continue' : 'Skip for Now'}
           </Button>
-        )}
-        <Button
-          mode={granted ? 'contained' : 'outlined'}
-          buttonColor={granted ? '#C41E3A' : undefined}
-          textColor={granted ? '#FFFFFF' : '#C41E3A'}
-          onPress={finish}
-          style={[styles.button, !granted && styles.outlinedButton]}
-          contentStyle={styles.buttonContent}
-        >
-          {granted ? 'Continue' : 'Skip for Now'}
-        </Button>
+        </View>
       </View>
-    </View>
     </AppBackground>
   );
 }

@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/types';
@@ -61,8 +68,10 @@ export function RegisterScreen({ navigation }: Props) {
         style={styles.scroll}
       >
         <View style={styles.header}>
-          <GnomeAvatar state="idle" size={80} />
-          <Text variant="headlineMedium" style={styles.title}>Create Account</Text>
+          <GnomeAvatar state="idle" size={200} />
+          <Text variant="headlineMedium" style={styles.title}>
+            Create Account
+          </Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
             Start protecting your home today
           </Text>
@@ -124,14 +133,24 @@ export function RegisterScreen({ navigation }: Props) {
             {'By creating an account, you agree to our '}
             <Text
               style={styles.legalLink}
-              onPress={() => navigation.navigate('Legal', { title: 'Terms of Service', content: TERMS_OF_SERVICE_MD })}
+              onPress={() =>
+                navigation.navigate('Legal', {
+                  title: 'Terms of Service',
+                  content: TERMS_OF_SERVICE_MD,
+                })
+              }
             >
               Terms of Service
             </Text>
             {' and '}
             <Text
               style={styles.legalLink}
-              onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}
+              onPress={() =>
+                navigation.navigate('Legal', {
+                  title: 'Privacy Policy',
+                  content: PRIVACY_POLICY_MD,
+                })
+              }
             >
               Privacy Policy
             </Text>

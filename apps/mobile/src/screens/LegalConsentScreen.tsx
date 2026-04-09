@@ -48,79 +48,84 @@ export function LegalConsentScreen() {
 
   return (
     <AppBackground>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <GnomeAvatar state="idle" size={72} />
-        <Text variant="headlineSmall" style={styles.title}>Before You Begin</Text>
-        <Text variant="bodyMedium" style={styles.subtitle}>
-          Please review our Privacy Policy and Terms of Service. You must accept them to use Inspector Gnome.
-        </Text>
-      </View>
-
-      {/* Privacy Policy accordion */}
-      <TouchableOpacity style={styles.accordionHeader} onPress={togglePp} activeOpacity={0.7}>
-        <MaterialCommunityIcons name="shield-account-outline" size={20} color="#B0B0B0" />
-        <Text variant="bodyLarge" style={styles.accordionLabel}>Privacy Policy</Text>
-        <MaterialCommunityIcons
-          name={ppExpanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color="#666666"
-        />
-      </TouchableOpacity>
-      {ppExpanded && (
-        <View style={styles.accordionBody}>
-          <Markdown style={markdownStyles}>{PRIVACY_POLICY_MD}</Markdown>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <GnomeAvatar state="idle" size={200} />
+          <Text variant="headlineSmall" style={styles.title}>
+            Before You Begin
+          </Text>
+          <Text variant="bodyMedium" style={styles.subtitle}>
+            Please review our Privacy Policy and Terms of Service. You must accept them to use
+            Inspector Gnome.
+          </Text>
         </View>
-      )}
 
-      <View style={styles.divider} />
+        {/* Privacy Policy accordion */}
+        <TouchableOpacity style={styles.accordionHeader} onPress={togglePp} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="shield-account-outline" size={20} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.accordionLabel}>
+            Privacy Policy
+          </Text>
+          <MaterialCommunityIcons
+            name={ppExpanded ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color="#666666"
+          />
+        </TouchableOpacity>
+        {ppExpanded && (
+          <View style={styles.accordionBody}>
+            <Markdown style={markdownStyles}>{PRIVACY_POLICY_MD}</Markdown>
+          </View>
+        )}
 
-      {/* Terms of Service accordion */}
-      <TouchableOpacity style={styles.accordionHeader} onPress={toggleTos} activeOpacity={0.7}>
-        <MaterialCommunityIcons name="file-document-outline" size={20} color="#B0B0B0" />
-        <Text variant="bodyLarge" style={styles.accordionLabel}>Terms of Service</Text>
-        <MaterialCommunityIcons
-          name={tosExpanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color="#666666"
-        />
-      </TouchableOpacity>
-      {tosExpanded && (
-        <View style={styles.accordionBody}>
-          <Markdown style={markdownStyles}>{TERMS_OF_SERVICE_MD}</Markdown>
-        </View>
-      )}
+        <View style={styles.divider} />
 
-      <View style={styles.divider} />
+        {/* Terms of Service accordion */}
+        <TouchableOpacity style={styles.accordionHeader} onPress={toggleTos} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="file-document-outline" size={20} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.accordionLabel}>
+            Terms of Service
+          </Text>
+          <MaterialCommunityIcons
+            name={tosExpanded ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color="#666666"
+          />
+        </TouchableOpacity>
+        {tosExpanded && (
+          <View style={styles.accordionBody}>
+            <Markdown style={markdownStyles}>{TERMS_OF_SERVICE_MD}</Markdown>
+          </View>
+        )}
 
-      {/* Acceptance checkbox */}
-      <TouchableOpacity
-        style={styles.checkRow}
-        onPress={() => setAccepted((v) => !v)}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.checkbox, accepted && styles.checkboxChecked]}>
-          {accepted && (
-            <MaterialCommunityIcons name="check" size={14} color="#FFFFFF" />
-          )}
-        </View>
-        <Text variant="bodyMedium" style={styles.checkLabel}>
-          I have read and agree to the Privacy Policy and Terms of Service
-        </Text>
-      </TouchableOpacity>
+        <View style={styles.divider} />
 
-      <Button
-        mode="contained"
-        onPress={handleAccept}
-        disabled={!accepted || isLoading}
-        loading={isLoading}
-        buttonColor="#C41E3A"
-        contentStyle={styles.btnContent}
-        style={styles.btn}
-      >
-        Accept & Continue
-      </Button>
-    </ScrollView>
+        {/* Acceptance checkbox */}
+        <TouchableOpacity
+          style={styles.checkRow}
+          onPress={() => setAccepted((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.checkbox, accepted && styles.checkboxChecked]}>
+            {accepted && <MaterialCommunityIcons name="check" size={14} color="#FFFFFF" />}
+          </View>
+          <Text variant="bodyMedium" style={styles.checkLabel}>
+            I have read and agree to the Privacy Policy and Terms of Service
+          </Text>
+        </TouchableOpacity>
+
+        <Button
+          mode="contained"
+          onPress={handleAccept}
+          disabled={!accepted || isLoading}
+          loading={isLoading}
+          buttonColor="#C41E3A"
+          contentStyle={styles.btnContent}
+          style={styles.btn}
+        >
+          Accept & Continue
+        </Button>
+      </ScrollView>
     </AppBackground>
   );
 }

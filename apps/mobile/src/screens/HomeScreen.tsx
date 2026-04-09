@@ -2,15 +2,17 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   ScreenContainer,
-  HeroCard,
   ActionCard,
   SectionHeader,
   InspectionListItem,
   GnomeTip,
+  GnomeAvatar,
 } from '../components';
 import { spacing, radii } from '../theme';
+import { useAuth } from '../hooks/useAuth';
 import { useMoldStatusCounts } from '../hooks/useMoldStatusCounts';
 import { useUserScans, type ScanWithResult } from '../hooks/useUserScans';
 import { useQuotaGate } from '../hooks/useQuotaGate';
@@ -59,9 +61,11 @@ function MoldStatusSection() {
 }
 
 export function HomeScreen({ navigation }: Props) {
+  const { user } = useAuth();
   const dispatch = useAppDispatch();
   const { data: recentScans } = useUserScans(5);
   const checkQuota = useQuotaGate();
+  const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? 'Homeowner';
 
   function handleViewAll() {
     navigation.navigate('HistoryTab');
@@ -85,12 +89,22 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>Dashboard</Text>
-        <Text variant="bodySmall" style={styles.subtitle}>Home Health Assistant</Text>
-      </View>
-
-      <HeroCard title="Protect Your Home" subtitle="Scan for mold and moisture risks instantly" />
+      <LinearGradient
+        colors={['#1A0A0A', '#3A0A0A', '#1A0A0A']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.welcomeCard}
+      >
+        <GnomeAvatar state="idle" size={110} />
+        <View style={styles.welcomeText}>
+          <Text variant="headlineSmall" style={styles.welcomeName}>
+            Welcome, {firstName}!
+          </Text>
+          <Text variant="bodyMedium" style={styles.welcomeSub}>
+            What would you like to do today?
+          </Text>
+        </View>
+      </LinearGradient>
 
       <TouchableOpacity
         style={styles.startScanBtn}
@@ -139,17 +153,24 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+  welcomeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radii.xl,
+    padding: spacing.xl,
+    marginTop: spacing.lg,
+    gap: spacing.lg,
   },
-  title: {
+  welcomeText: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  welcomeName: {
     color: '#FFFFFF',
     fontWeight: '700',
   },
-  subtitle: {
-    color: '#B0B0B0',
-    marginTop: 2,
+  welcomeSub: {
+    color: '#B0A0A0',
   },
   secondaryActions: {
     flexDirection: 'row',

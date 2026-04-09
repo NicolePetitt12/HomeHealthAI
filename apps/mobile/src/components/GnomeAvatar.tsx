@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import Svg, { Circle, Ellipse, Path, Polygon, Rect, Text as SvgText, G } from 'react-native-svg';
 
 export type GnomeState = 'idle' | 'analyzing' | 'concern';
@@ -11,42 +11,11 @@ interface Props {
 
 function GnomeIdle({ size }: { size: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 200 200">
-      {/* Hat */}
-      <Polygon points="100,20 60,90 140,90" fill="#C41E3A" />
-      <Ellipse cx="100" cy="90" rx="42" ry="10" fill="#7F0000" />
-      <Rect x="62" y="83" width="76" height="12" rx="6" fill="#4CAF50" />
-      {/* Face */}
-      <Ellipse cx="100" cy="115" rx="28" ry="26" fill="#FFCC80" />
-      {/* Eyes */}
-      <Ellipse cx="90" cy="110" rx="4" ry="4.5" fill="#4E342E" />
-      <Ellipse cx="110" cy="110" rx="4" ry="4.5" fill="#4E342E" />
-      <Circle cx="92" cy="108" r="1.5" fill="#FFFFFF" />
-      <Circle cx="112" cy="108" r="1.5" fill="#FFFFFF" />
-      {/* Nose */}
-      <Ellipse cx="100" cy="117" rx="5" ry="4" fill="#FFAB40" />
-      {/* Smile */}
-      <Path d="M88 126 Q100 134 112 126" stroke="#795548" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* Beard */}
-      <Path d="M76 130 Q78 148 100 152 Q122 148 124 130" fill="#FAFAFA" />
-      {/* Body */}
-      <Rect x="72" y="148" width="56" height="36" rx="10" fill="#C41E3A" />
-      {/* Arms */}
-      <Ellipse cx="60" cy="163" rx="14" ry="8" fill="#D32F2F" />
-      <Ellipse cx="140" cy="163" rx="14" ry="8" fill="#D32F2F" />
-      {/* Hands */}
-      <Circle cx="50" cy="168" r="7" fill="#FFCC80" />
-      <Circle cx="150" cy="168" r="7" fill="#FFCC80" />
-      {/* Belt */}
-      <Rect x="72" y="165" width="56" height="8" rx="4" fill="#7F0000" />
-      <Rect x="96" y="163" width="8" height="12" rx="2" fill="#FFA000" />
-      {/* Legs */}
-      <Rect x="78" y="182" width="18" height="20" rx="6" fill="#7F0000" />
-      <Rect x="104" y="182" width="18" height="20" rx="6" fill="#7F0000" />
-      {/* Boots */}
-      <Ellipse cx="87" cy="200" rx="12" ry="6" fill="#4E342E" />
-      <Ellipse cx="113" cy="200" rx="12" ry="6" fill="#4E342E" />
-    </Svg>
+    <Image
+      source={require('../../assets/hi-gnome.png')}
+      style={{ width: size, height: size }}
+      resizeMode="contain"
+    />
   );
 }
 

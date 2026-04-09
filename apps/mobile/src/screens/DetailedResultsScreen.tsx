@@ -14,6 +14,7 @@ import {
 import { spacing, radii } from '../theme';
 import { useAppSelector } from '../store/hooks';
 import { supabase } from '../services/supabase';
+import { useAnalysisResult } from '../hooks/useAnalysisResult';
 import { getMockAnalysis } from './results/mockAnalysisData';
 import type { MainStackScreenProps } from '../navigation/types';
 
@@ -27,7 +28,7 @@ const PROFESSIONAL_LABELS: Record<string, string> = {
 };
 
 export function DetailedResultsScreen({ navigation, route }: Props) {
-  const { inspectionId, riskLevel } = route.params;
+  const { inspectionId, riskLevel: fallbackRiskLevel } = route.params;
   const currentScan = useAppSelector((s) => s.inspection.currentScan);
   const scan = currentScan?.id === inspectionId ? currentScan : null;
 
@@ -42,19 +43,18 @@ export function DetailedResultsScreen({ navigation, route }: Props) {
       });
   }, [scan?.imagePath]);
 
-  // Use mock data for the passed riskLevel — no re-analysis
-  const analysis = getMockAnalysis(riskLevel);
+  const { data: dbAnalysis, isLoading: analysisLoading } = useAnalysisResult(inspectionId);
+  // Use real DB data when available; fall back to mock when the scan has no analysis row yet
+  const analysis = dbAnalysis ?? (analysisLoading ? null : getMockAnalysis(fallbackRiskLevel ?? 'moderate'));
 
-  const confidence = Math.round(analysis.confidence * 100);
-  const professionalLabel = analysis.suggestedProfessionalType
+  const confidence = analysis ? Math.round(analysis.confidence * 100) : 0;
+  const professionalLabel = analysis?.suggestedProfessionalType
     ? PROFESSIONAL_LABELS[analysis.suggestedProfessionalType]
     : null;
 
-  const scanDate = new Date().toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const scanDate = analysis
+    ? new Date(analysis.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <ScreenContainer>
@@ -83,7 +83,11 @@ export function DetailedResultsScreen({ navigation, route }: Props) {
         </View>
       )}
 
-      <>
+      {analysisLoading && !analysis ? (
+        <ActivityIndicator color="#C41E3A" style={{ marginTop: spacing.xxl }} />
+      ) : null}
+
+      {analysis ? <>
         {/* Confidence */}
         <View style={styles.section}>
           <ConfidenceBar percentage={confidence} />
@@ -173,7 +177,7 @@ export function DetailedResultsScreen({ navigation, route }: Props) {
             </View>
           </View>
         )}
-      </>
+      </> : null}
 
       <View style={{ marginTop: spacing.xl }}>
         <DisclaimerBanner />

@@ -1,24 +1,16 @@
-import type { AnalysisResult, ProfessionalType, RiskLevel } from '@inspector-gnome/shared';
+import type { AnalysisResult, RiskLevel } from '@inspector-gnome/shared';
 
 export type ResultCategory = 'mold_suspected' | 'inconclusive' | 'clean_mold_safely';
 
 export interface ResultsViewData extends AnalysisResult {
-  /** Short headline: what the AI detected */
-  likelyIssue: string;
-  /** Professional type to recommend, or null when none needed */
-  suggestedProfessionalType: ProfessionalType | null;
-  /** Result category for UI rendering */
+  /** Result category for UI rendering (derived from riskLevel) */
   category: ResultCategory;
-  /** Description text shown below the headline */
+  // The following fields override the nullable AnalysisResult fields with non-null types
+  // (always populated in ResultsViewData, either from DB or from mock fallback)
+  likelyIssue: string;
   description: string;
-  /** Recommendation section title */
   recommendationTitle: string;
-  /** Recommendation items (bullet points) */
   recommendations: string[];
-  /** Suspected mold type name (if applicable) */
-  suspectedMoldType: string | null;
-  /** Short description of the suspected mold */
-  suspectedMoldDescription: string | null;
 }
 
 function categoryForRisk(risk: RiskLevel): ResultCategory {

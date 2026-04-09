@@ -20,14 +20,11 @@ function buildViewData(
   const mock = getMockAnalysis(realAnalysis.riskLevel);
   return {
     ...realAnalysis,
-    likelyIssue: mock.likelyIssue,
-    suggestedProfessionalType: mock.suggestedProfessionalType,
     category: categoryForRisk(realAnalysis.riskLevel),
-    description: mock.description,
-    recommendationTitle: mock.recommendationTitle,
-    recommendations: mock.recommendations,
-    suspectedMoldType: mock.suspectedMoldType,
-    suspectedMoldDescription: mock.suspectedMoldDescription,
+    likelyIssue: realAnalysis.likelyIssue ?? mock.likelyIssue,
+    description: realAnalysis.description ?? mock.description,
+    recommendationTitle: realAnalysis.recommendationTitle ?? mock.recommendationTitle,
+    recommendations: realAnalysis.recommendations ?? mock.recommendations,
   };
 }
 

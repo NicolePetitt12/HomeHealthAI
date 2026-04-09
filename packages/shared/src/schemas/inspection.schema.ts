@@ -79,6 +79,14 @@ export const AnalysisResultSchema = z.object({
   nextSteps: z.array(z.string()),
   modelVersion: z.string().nullable(),
   createdAt: z.string().datetime(),
+  // UI display fields (populated by Edge Function)
+  likelyIssue: z.string().nullable(),
+  description: z.string().nullable(),
+  recommendationTitle: z.string().nullable(),
+  recommendations: z.array(z.string()).nullable(),
+  suggestedProfessionalType: ProfessionalType.nullable(),
+  suspectedMoldType: z.string().nullable(),
+  suspectedMoldDescription: z.string().nullable(),
 });
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 

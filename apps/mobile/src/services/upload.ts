@@ -81,3 +81,23 @@ export async function createScanRecord(
     updatedAt: data.updated_at,
   };
 }
+
+// ─── Trigger Analysis ─────────────────────────────────────────────────────────
+// Directly invoke the Edge Function instead of relying on the pg_net trigger,
+// which requires a separate `supabase functions serve` process to be running.
+
+export async function triggerAnalysis(scan: Scan): Promise<void> {
+  const { error } = await supabase.functions.invoke('analyze-scan', {
+    body: {
+      record: {
+        id: scan.id,
+        user_id: scan.userId,
+        image_path: scan.imagePath,
+        location: scan.location,
+        notes: scan.notes,
+        status: scan.status,
+      },
+    },
+  });
+  if (error) throw error;
+}

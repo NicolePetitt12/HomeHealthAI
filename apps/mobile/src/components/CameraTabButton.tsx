@@ -1,12 +1,23 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/types';
 
-export function CameraTabButton({ onPress }: BottomTabBarButtonProps) {
+type Nav = NativeStackNavigationProp<MainStackParamList>;
+
+export function CameraTabButton(_props: BottomTabBarButtonProps) {
+  const navigation = useNavigation<Nav>();
+
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('StartScan')}
+        activeOpacity={0.85}
+      >
         <MaterialCommunityIcons name="camera" size={28} color="#FFFFFF" />
       </TouchableOpacity>
     </View>

@@ -12,33 +12,18 @@ import {
 } from '../components';
 import { spacing, radii } from '../theme';
 import { useMoldStatusCounts } from '../hooks/useMoldStatusCounts';
+import { useUserScans, type ScanWithResult } from '../hooks/useUserScans';
+import { useAppDispatch } from '../store/hooks';
+import { setCurrentScan } from '../store/slices/inspectionSlice';
 import type { MainTabScreenProps } from '../navigation/types';
-import type { RiskLevel } from '@inspector-gnome/shared';
 
 type Props = MainTabScreenProps<'HomeTab'>;
 
-const MOCK_INSPECTIONS: Array<{
-  id: string;
-  location: string;
-  date: string;
-  riskLevel: RiskLevel;
-  status: string;
-}> = [
-  {
-    id: '1',
-    location: 'Basement - West Wall',
-    date: 'Oct 24, 2025',
-    riskLevel: 'moderate',
-    status: 'Review Recommended',
-  },
-  {
-    id: '2',
-    location: 'Master Bathroom',
-    date: 'Oct 22, 2025',
-    riskLevel: 'low',
-    status: 'Monitoring',
-  },
-];
+const STATUS_LABELS: Record<string, string> = {
+  high: 'Action Required',
+  moderate: 'Review Recommended',
+  low: 'Monitoring',
+};
 
 function MoldStatusSection() {
   const { data } = useMoldStatusCounts();
@@ -48,11 +33,7 @@ function MoldStatusSection() {
 
   return (
     <View style={moldStyles.container}>
-      <Text variant="titleMedium" style={moldStyles.title}>
-        Mold Status
-      </Text>
-
-      {/* Top row */}
+      <Text variant="titleMedium" style={moldStyles.title}>Mold Status</Text>
       <View style={moldStyles.row}>
         <View style={[moldStyles.cell, moldStyles.likelyCell]}>
           <Text style={moldStyles.likelyLabel}>Likely Mold</Text>
@@ -66,8 +47,6 @@ function MoldStatusSection() {
           <Text style={moldStyles.cellCount}>{notSure}</Text>
         </View>
       </View>
-
-      {/* Bottom row */}
       <View style={moldStyles.row}>
         <View style={[moldStyles.cell, moldStyles.darkCell, moldStyles.fullCell]}>
           <Text style={moldStyles.cellLabel}>Unlikely Mold</Text>
@@ -79,28 +58,38 @@ function MoldStatusSection() {
 }
 
 export function HomeScreen({ navigation }: Props) {
+  const dispatch = useAppDispatch();
+  const { data: recentScans } = useUserScans(5);
+
   function handleViewAll() {
     navigation.navigate('HistoryTab');
   }
 
-  function handleInspection(id: string) {
-    navigation.navigate('Results', { inspectionId: id });
+  function handleScanPress(scan: ScanWithResult) {
+    dispatch(setCurrentScan({
+      id: scan.id,
+      userId: scan.userId,
+      imagePath: scan.imagePath,
+      location: scan.location,
+      notes: scan.notes,
+      status: scan.status as 'pending' | 'processing' | 'completed' | 'failed',
+      createdAt: scan.createdAt,
+      updatedAt: scan.createdAt,
+    }));
+    navigation.navigate('DetailedResults', { inspectionId: scan.id, riskLevel: scan.riskLevel ?? undefined });
   }
+
+  const hasScans = recentScans && recentScans.length > 0;
 
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Dashboard
-        </Text>
-        <Text variant="bodySmall" style={styles.subtitle}>
-          Home Health Assistant
-        </Text>
+        <Text variant="headlineMedium" style={styles.title}>Dashboard</Text>
+        <Text variant="bodySmall" style={styles.subtitle}>Home Health Assistant</Text>
       </View>
 
       <HeroCard title="Protect Your Home" subtitle="Scan for mold and moisture risks instantly" />
 
-      {/* Start Scan — full-width red button */}
       <TouchableOpacity
         style={styles.startScanBtn}
         onPress={() => navigation.navigate('StartScan')}
@@ -111,12 +100,7 @@ export function HomeScreen({ navigation }: Props) {
       </TouchableOpacity>
 
       <View style={styles.secondaryActions}>
-        <ActionCard
-          icon="clipboard-list-outline"
-          label="Scan History"
-          onPress={handleViewAll}
-          iconColor="#FFFFFF"
-        />
+        <ActionCard icon="clipboard-list-outline" label="Scan History" onPress={handleViewAll} iconColor="#FFFFFF" />
         <ActionCard icon="information" label="Learn More" onPress={() => {}} iconColor="#B0B0B0" />
       </View>
 
@@ -124,16 +108,26 @@ export function HomeScreen({ navigation }: Props) {
 
       <SectionHeader title="Recent Inspections" actionLabel="View All" onAction={handleViewAll} />
 
-      {MOCK_INSPECTIONS.map((item) => (
-        <InspectionListItem
-          key={item.id}
-          location={item.location}
-          date={item.date}
-          riskLevel={item.riskLevel}
-          status={item.status}
-          onPress={() => handleInspection(item.id)}
-        />
-      ))}
+      {hasScans ? (
+        recentScans.map((scan) => (
+          <InspectionListItem
+            key={scan.id}
+            location={scan.location}
+            date={new Date(scan.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            riskLevel={scan.riskLevel ?? 'low'}
+            status={scan.riskLevel ? STATUS_LABELS[scan.riskLevel] ?? scan.status : scan.status}
+            onPress={() => handleScanPress(scan)}
+          />
+        ))
+      ) : (
+        <View style={styles.emptyState}>
+          <MaterialCommunityIcons name="magnify-scan" size={48} color="#3A3A3A" />
+          <Text variant="bodyMedium" style={styles.emptyText}>No scans yet</Text>
+          <Text variant="bodySmall" style={styles.emptySubtext}>
+            Start your first scan to see results here.
+          </Text>
+        </View>
+      )}
 
       <View style={styles.tip}>
         <GnomeTip text="Keep indoor humidity below 60% to prevent mold growth. Use a dehumidifier in damp areas like basements and bathrooms." />
@@ -155,12 +149,6 @@ const styles = StyleSheet.create({
     color: '#B0B0B0',
     marginTop: 2,
   },
-  actions: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.xl,
-    marginBottom: spacing.xxl,
-  },
   secondaryActions: {
     flexDirection: 'row',
     gap: spacing.md,
@@ -176,7 +164,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
-    marginHorizontal: 0,
   },
   startScanText: {
     color: '#FFFFFF',
@@ -185,6 +172,18 @@ const styles = StyleSheet.create({
   },
   tip: {
     marginTop: spacing.xl,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: spacing.xxxl,
+    gap: spacing.sm,
+  },
+  emptyText: {
+    color: '#888888',
+  },
+  emptySubtext: {
+    color: '#555555',
+    textAlign: 'center',
   },
 });
 

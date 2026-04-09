@@ -1,15 +1,20 @@
 import React, { useState, useMemo } from 'react';
-import { FlatList, View, StyleSheet } from 'react-native';
+import { FlatList, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   ScreenContainer,
   SearchBar,
   FilterChipRow,
   InspectionListItem,
 } from '../components';
-import { spacing } from '../theme';
+import { spacing, radii } from '../theme';
+import { useUserScans } from '../hooks/useUserScans';
+import { useAppDispatch } from '../store/hooks';
+import { setCurrentScan } from '../store/slices/inspectionSlice';
 import type { MainTabScreenProps } from '../navigation/types';
 import type { RiskLevel } from '@inspector-gnome/shared';
+import type { ScanWithResult } from '../hooks/useUserScans';
 
 type Props = MainTabScreenProps<'HistoryTab'>;
 
@@ -22,31 +27,40 @@ const FILTER_OPTIONS: Array<{ label: string; value: FilterValue; color?: string 
   { label: 'Low', value: 'low', color: '#C41E3A' },
 ];
 
-const MOCK_HISTORY: Array<{
-  id: string;
-  location: string;
-  date: string;
-  riskLevel: RiskLevel;
-  status: string;
-}> = [
-  { id: '1', location: 'Basement - West Wall', date: 'Oct 24, 2025', riskLevel: 'high', status: 'Action Required' },
-  { id: '2', location: 'Master Bathroom Ceiling', date: 'Oct 22, 2025', riskLevel: 'moderate', status: 'Review Recommended' },
-  { id: '3', location: 'Kitchen - Under Sink', date: 'Oct 18, 2025', riskLevel: 'low', status: 'Monitoring' },
-  { id: '4', location: 'Attic - North Side', date: 'Oct 14, 2025', riskLevel: 'high', status: 'Action Required' },
-  { id: '5', location: 'Laundry Room', date: 'Oct 10, 2025', riskLevel: 'moderate', status: 'Review Recommended' },
-];
+const STATUS_LABELS: Record<string, string> = {
+  high: 'Action Required',
+  moderate: 'Review Recommended',
+  low: 'Monitoring',
+};
 
 export function HistoryScreen({ navigation }: Props) {
+  const dispatch = useAppDispatch();
+  const { data: scans, isLoading } = useUserScans();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<FilterValue>('all');
 
   const filtered = useMemo(() => {
-    return MOCK_HISTORY.filter((item) => {
+    if (!scans) return [];
+    return scans.filter((item) => {
       const matchesFilter = filter === 'all' || item.riskLevel === filter;
       const matchesSearch = item.location.toLowerCase().includes(query.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [query, filter]);
+  }, [scans, query, filter]);
+
+  function handleScanPress(scan: ScanWithResult) {
+    dispatch(setCurrentScan({
+      id: scan.id,
+      userId: scan.userId,
+      imagePath: scan.imagePath,
+      location: scan.location,
+      notes: scan.notes,
+      status: scan.status as 'pending' | 'processing' | 'completed' | 'failed',
+      createdAt: scan.createdAt,
+      updatedAt: scan.createdAt,
+    }));
+    navigation.navigate('DetailedResults', { inspectionId: scan.id, riskLevel: scan.riskLevel ?? undefined });
+  }
 
   return (
     <ScreenContainer scrollable={false} padded={false}>
@@ -67,15 +81,37 @@ export function HistoryScreen({ navigation }: Props) {
         renderItem={({ item }) => (
           <InspectionListItem
             location={item.location}
-            date={item.date}
-            riskLevel={item.riskLevel}
-            status={item.status}
+            date={new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            riskLevel={item.riskLevel ?? 'low'}
+            status={item.riskLevel ? STATUS_LABELS[item.riskLevel] ?? item.status : item.status}
             showViewDetails
-            onPress={() => navigation.navigate('Results', { inspectionId: item.id })}
+            onPress={() => handleScanPress(item)}
           />
         )}
         ListEmptyComponent={
-          <Text variant="bodyMedium" style={styles.empty}>No inspections found.</Text>
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconWrap}>
+              <MaterialCommunityIcons name="clipboard-text-search-outline" size={56} color="#C41E3A" />
+            </View>
+            <Text variant="titleMedium" style={styles.emptyTitle}>
+              {isLoading ? 'Loading scans…' : 'No Scans Yet'}
+            </Text>
+            {!isLoading && (
+              <>
+                <Text variant="bodyMedium" style={styles.emptySubtext}>
+                  Your scan history will appear here once you perform your first inspection.
+                </Text>
+                <TouchableOpacity
+                  style={styles.emptyBtn}
+                  onPress={() => navigation.navigate('StartScan')}
+                  activeOpacity={0.85}
+                >
+                  <MaterialCommunityIcons name="camera" size={18} color="#FFFFFF" />
+                  <Text variant="labelLarge" style={styles.emptyBtnText}>Start Your First Scan</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
         }
       />
     </ScreenContainer>
@@ -96,10 +132,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
+    flexGrow: 1,
   },
-  empty: {
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: spacing.xxxl * 2,
+    paddingHorizontal: spacing.xxxl,
+    gap: spacing.lg,
+  },
+  emptyIconWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#1C1212',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptySubtext: {
     color: '#888888',
     textAlign: 'center',
-    marginTop: spacing.xxxl,
+    lineHeight: 22,
+  },
+  emptyBtn: {
+    backgroundColor: '#C41E3A',
+    borderRadius: radii.full,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  emptyBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });

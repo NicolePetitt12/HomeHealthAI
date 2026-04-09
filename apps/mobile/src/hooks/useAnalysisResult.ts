@@ -14,6 +14,13 @@ function mapRow(row: Record<string, unknown>): AnalysisResult {
     nextSteps: (row.next_steps as string[]) ?? [],
     modelVersion: (row.model_version as string | null) ?? null,
     createdAt: row.created_at as string,
+    likelyIssue: (row.likely_issue as string | null) ?? null,
+    description: (row.description as string | null) ?? null,
+    recommendationTitle: (row.recommendation_title as string | null) ?? null,
+    recommendations: (row.recommendations as string[] | null) ?? null,
+    suggestedProfessionalType: (row.suggested_professional_type as AnalysisResult['suggestedProfessionalType']) ?? null,
+    suspectedMoldType: (row.suspected_mold_type as string | null) ?? null,
+    suspectedMoldDescription: (row.suspected_mold_description as string | null) ?? null,
   };
 }
 

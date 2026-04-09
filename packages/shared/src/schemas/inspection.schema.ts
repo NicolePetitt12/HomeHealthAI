@@ -217,5 +217,7 @@ export const EntitlementSchema = z.object({
   subscriptionStatus: SubscriptionStatus.nullable(),
   currentPeriodEnd: z.string().datetime().nullable(),
   cancelAtPeriodEnd: z.boolean(),
+  quotaPeriodStart: z.string().datetime().nullable().optional(),
+  quotaPeriodEnd: z.string().datetime().nullable().optional(),
 });
 export type Entitlement = z.infer<typeof EntitlementSchema>;

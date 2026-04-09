@@ -2,6 +2,9 @@
  * change-subscription — Switches an existing active subscription to a new price,
  * with Stripe proration (always_invoice: generates a proration invoice immediately).
  *
+ * The DB is NOT updated here — the stripe-webhook handler will update the
+ * subscriptions table when it receives the customer.subscription.updated event.
+ *
  * Request body: { priceId: string }
  * Returns:      { success: true, subscriptionId: string, status: string }
  *
@@ -110,8 +113,6 @@ Deno.serve(async (req: Request) => {
       updateParams,
     );
 
-    // The stripe-webhook will handle updating the DB when it receives
-    // customer.subscription.updated and invoice.payment_succeeded events.
     return json({
       success: true,
       subscriptionId: updated.id,

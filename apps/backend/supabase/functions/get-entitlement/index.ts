@@ -49,11 +49,13 @@ Deno.serve(async (req: Request) => {
   const scansAllowed: number = SCAN_LIMITS[planTier] ?? 3;
   const canScan = scansAllowed === -1 || scansUsed < scansAllowed;
 
-  // ── Subscription details (if subscribed) ────────────────────────────────
+  // ── Subscription details (paid) or profile anchor (free) ─────────────────
 
   let subscriptionStatus: string | null = null;
   let currentPeriodEnd: string | null = null;
   let cancelAtPeriodEnd = false;
+  let quotaPeriodStart: string | null = null;
+  let quotaPeriodEnd: string | null = null;
 
   if (planTier !== 'free') {
     const { data: customer } = await admin
@@ -65,7 +67,7 @@ Deno.serve(async (req: Request) => {
     if (customer) {
       const { data: sub } = await admin
         .from('subscriptions')
-        .select('status, current_period_end, cancel_at_period_end')
+        .select('status, current_period_start, current_period_end, cancel_at_period_end')
         .eq('customer_id', customer.id)
         .in('status', ['active', 'trialing', 'past_due'])
         .order('created_at', { ascending: false })
@@ -76,7 +78,29 @@ Deno.serve(async (req: Request) => {
         subscriptionStatus = sub.status;
         currentPeriodEnd = sub.current_period_end;
         cancelAtPeriodEnd = sub.cancel_at_period_end ?? false;
+        quotaPeriodStart = sub.current_period_start;
+        quotaPeriodEnd = sub.current_period_end;
       }
+    }
+  } else {
+    // Free users: compute the rolling monthly window from profile creation date
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('created_at')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.created_at) {
+      const createdAt = new Date(profile.created_at);
+      const now = new Date();
+      const msPerMonth = 1000 * 60 * 60 * 24 * 30.44; // average month in ms
+      const monthsElapsed = Math.floor((now.getTime() - createdAt.getTime()) / msPerMonth);
+      const periodStart = new Date(createdAt);
+      periodStart.setMonth(periodStart.getMonth() + monthsElapsed);
+      const periodEnd = new Date(periodStart);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      quotaPeriodStart = periodStart.toISOString();
+      quotaPeriodEnd = periodEnd.toISOString();
     }
   }
 
@@ -88,6 +112,8 @@ Deno.serve(async (req: Request) => {
     subscriptionStatus,
     currentPeriodEnd,
     cancelAtPeriodEnd,
+    quotaPeriodStart,
+    quotaPeriodEnd,
   });
 });
 

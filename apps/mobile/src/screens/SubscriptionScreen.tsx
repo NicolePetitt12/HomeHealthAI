@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -64,11 +64,33 @@ export function SubscriptionScreen({ navigation: _navigation }: Props) {
   const currentTier: PlanTier = entitlement?.planTier ?? 'free';
   const hasActiveSubscription = !!subscription?.stripeSubscriptionId;
   const isLoading = entitlementLoading || plansLoading;
+
+  // Track which priceId is being processed so we show the spinner on the right card
+  const pendingPriceId: string | null =
+    changeSubMutation.isPending ? (changeSubMutation.variables as string) ?? null
+    : checkoutMutation.isPending ? (checkoutMutation.variables as string) ?? null
+    : null;
+
   const isBusy =
     checkoutMutation.isPending ||
     changeSubMutation.isPending ||
     cancelSubMutation.isPending ||
     portalMutation.isPending;
+
+  // After a change is submitted, show a "processing" notice on all plan cards
+  // until the webhook arrives and React Query refetches with the new tier.
+  const isProcessing = changeSubMutation.isSuccess || checkoutMutation.isSuccess;
+
+  // When currentTier changes it means the webhook was received and the DB was
+  // updated. Reset mutation state so the processing banner disappears.
+  const prevTierRef = useRef(currentTier);
+  useEffect(() => {
+    if (prevTierRef.current !== currentTier) {
+      prevTierRef.current = currentTier;
+      if (changeSubMutation.isSuccess) changeSubMutation.reset();
+      if (checkoutMutation.isSuccess) checkoutMutation.reset();
+    }
+  }, [currentTier, changeSubMutation, checkoutMutation]);
 
   function handleSelectPlan(plan: Plan) {
     if (plan.appPlanId === currentTier) {
@@ -76,10 +98,8 @@ export function SubscriptionScreen({ navigation: _navigation }: Props) {
       return;
     }
     if (hasActiveSubscription) {
-      // Already subscribed — update the existing subscription in place (with proration)
       changeSubMutation.mutate(plan.priceId);
     } else {
-      // Free user — needs to create a new subscription via Payment Sheet
       checkoutMutation.mutate(plan.priceId);
     }
   }
@@ -95,7 +115,9 @@ export function SubscriptionScreen({ navigation: _navigation }: Props) {
     });
   }
 
-  function getButtonLabel(tier: PlanTier): string {
+  function getButtonLabel(plan: Plan): string {
+    const tier = plan.appPlanId as PlanTier;
+    if (pendingPriceId === plan.priceId) return 'Processing…';
     if (tier === currentTier) return 'Manage plan';
     if (currentTier !== 'free' && tier === 'pro') return 'Upgrade';
     if (currentTier !== 'free' && tier === 'home') return 'Downgrade';
@@ -110,6 +132,15 @@ export function SubscriptionScreen({ navigation: _navigation }: Props) {
           <Text variant="bodyMedium" style={styles.subheading}>
             Upgrade to get more scans and unlock all features.
           </Text>
+
+          {isProcessing && (
+            <View style={styles.processingBanner}>
+              <ActivityIndicator size="small" color="#FFB74D" />
+              <Text style={styles.processingText}>
+                Processing your plan change… this may take a few seconds.
+              </Text>
+            </View>
+          )}
 
           {isLoading ? (
             <ActivityIndicator size="large" color="#C41E3A" style={styles.loader} />
@@ -211,21 +242,21 @@ export function SubscriptionScreen({ navigation: _navigation }: Props) {
                     <TouchableOpacity
                       style={[
                         styles.planButton,
-                        { backgroundColor: isCurrent || isDisabled ? 'transparent' : ui.color },
-                        (isCurrent || isDisabled) && { borderWidth: 1, borderColor: ui.color + '66' },
+                        { backgroundColor: isCurrent || isBusy ? 'transparent' : ui.color },
+                        (isCurrent || isBusy) && { borderWidth: 1, borderColor: ui.color + '66' },
                       ]}
                       onPress={() => handleSelectPlan(plan)}
-                      disabled={isDisabled}
+                      disabled={isBusy}
                       activeOpacity={0.8}
                     >
-                      {isBusy && isCurrent ? (
+                      {pendingPriceId === plan.priceId ? (
                         <ActivityIndicator size="small" color={ui.color} />
                       ) : (
                         <Text style={[
                           styles.planButtonText,
-                          { color: isCurrent || isDisabled ? ui.color : '#FFFFFF' },
+                          { color: isCurrent || isBusy ? ui.color : '#FFFFFF' },
                         ]}>
-                          {getButtonLabel(plan.appPlanId as PlanTier)}
+                          {getButtonLabel(plan)}
                         </Text>
                       )}
                     </TouchableOpacity>
@@ -283,6 +314,24 @@ const styles = StyleSheet.create({
     color: '#B0A0A0',
     textAlign: 'center',
     marginBottom: spacing.xxxl,
+  },
+  processingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: '#2A2010',
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: '#5A4010',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  processingText: {
+    flex: 1,
+    color: '#FFB74D',
+    fontSize: 13,
+    lineHeight: 18,
   },
   loader: {
     marginTop: spacing.xxxl,

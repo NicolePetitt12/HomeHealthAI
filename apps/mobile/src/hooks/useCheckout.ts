@@ -58,6 +58,23 @@ export function useCheckout() {
       if (result === 'success') {
         queryClient.invalidateQueries({ queryKey: ['entitlement'] });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
+
+        showDialog({
+          title: 'Payment successful',
+          message: 'Your subscription is being activated. It will be reflected shortly.',
+        });
+
+        // Poll every 3s for up to 30s; stop early once the entitlement tier
+        // changes (webhook has been processed).
+        const prevTier = (queryClient.getQueryData(['entitlement']) as { planTier?: string } | undefined)?.planTier;
+        let attempts = 0;
+        const poll = setInterval(async () => {
+          attempts += 1;
+          await queryClient.invalidateQueries({ queryKey: ['entitlement'] });
+          await queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          const newTier = (queryClient.getQueryData(['entitlement']) as { planTier?: string } | undefined)?.planTier;
+          if (newTier !== prevTier || attempts >= 10) clearInterval(poll);
+        }, 3000);
       }
     },
     onError: (err: Error) => {
@@ -73,8 +90,26 @@ export function useChangeSubscription() {
   return useMutation({
     mutationFn: (priceId: string) => changeSubscription(priceId),
     onSuccess: () => {
+      // Invalidate immediately — the webhook may or may not have arrived yet.
       queryClient.invalidateQueries({ queryKey: ['entitlement'] });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
+
+      showDialog({
+        title: 'Plan change submitted',
+        message: 'Your payment is being processed. The new plan will be reflected shortly.',
+      });
+
+      // Poll every 3s for up to 30s; stop early once the entitlement tier
+      // changes (webhook has been processed).
+      const prevTier = (queryClient.getQueryData(['entitlement']) as { planTier?: string } | undefined)?.planTier;
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts += 1;
+        await queryClient.invalidateQueries({ queryKey: ['entitlement'] });
+        await queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        const newTier = (queryClient.getQueryData(['entitlement']) as { planTier?: string } | undefined)?.planTier;
+        if (newTier !== prevTier || attempts >= 10) clearInterval(poll);
+      }, 3000);
     },
     onError: (err: Error) => {
       showDialog({ title: 'Plan change failed', message: err.message });

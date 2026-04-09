@@ -2,9 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import { ScreenContainer, useDialog } from '../components';
+import { ScreenContainer, WelcomeCard, useDialog } from '../components';
 import { spacing, radii } from '../theme';
 import { useQuotaGate } from '../hooks/useQuotaGate';
 import type { MainStackScreenProps } from '../navigation/types';
@@ -43,19 +42,11 @@ export function StartScanScreen({ navigation, route }: Props) {
 
   return (
     <ScreenContainer>
-      {/* Image placeholder — same area as HeroCard */}
-      <LinearGradient
-        colors={['#1A1A1A', '#111111']}
-        style={styles.imagePlaceholder}
-      >
-        <MaterialCommunityIcons name="image-area" size={48} color="#3A3A3A" />
-        <Text variant="bodySmall" style={styles.placeholderText}>Photo preview</Text>
-      </LinearGradient>
-
-      {/* Instructions */}
-      <Text variant="bodyMedium" style={styles.instructions}>
-        Capture or upload a photo of the affected area to get started.
-      </Text>
+      <WelcomeCard
+        title="New Inspection"
+        subtitle="Take or upload a photo of the area you'd like to inspect."
+        gnomeState="analyzing"
+      />
 
       {/* Action buttons */}
       <View style={styles.actions}>
@@ -80,27 +71,6 @@ export function StartScanScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  imagePlaceholder: {
-    borderRadius: radii.xl,
-    height: 180,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xxl,
-    borderWidth: 1,
-    borderColor: '#2A2A2A',
-    borderStyle: 'dashed',
-  },
-  placeholderText: {
-    color: '#3A3A3A',
-  },
-  instructions: {
-    color: '#B0B0B0',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.xxxl,
-    paddingHorizontal: spacing.lg,
-  },
   actions: {
     flexDirection: 'row',
     gap: spacing.md,

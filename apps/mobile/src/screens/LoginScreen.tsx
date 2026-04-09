@@ -24,11 +24,25 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 function GoogleG({ size = 20 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 48 48">
-      <Path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.3 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.8 6C12.2 13.1 17.6 9.5 24 9.5z"/>
-      <Path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.9 7.2l7.6 5.9c4.5-4.1 7.1-10.2 7.1-17.1z"/>
-      <Path fill="#FBBC05" d="M10.4 28.7a14.6 14.6 0 0 1 0-9.4l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z"/>
-      <Path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.6-5.9c-2 1.4-4.7 2.2-7.6 2.2-6.4 0-11.8-3.6-13.6-8.9l-7.8 6C6.6 42.6 14.6 48 24 48z"/>
-      <G><Path fill="none" d="M0 0h48v48H0z"/></G>
+      <Path
+        fill="#EA4335"
+        d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.3 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.8 6C12.2 13.1 17.6 9.5 24 9.5z"
+      />
+      <Path
+        fill="#4285F4"
+        d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.9 7.2l7.6 5.9c4.5-4.1 7.1-10.2 7.1-17.1z"
+      />
+      <Path
+        fill="#FBBC05"
+        d="M10.4 28.7a14.6 14.6 0 0 1 0-9.4l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z"
+      />
+      <Path
+        fill="#34A853"
+        d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.6-5.9c-2 1.4-4.7 2.2-7.6 2.2-6.4 0-11.8-3.6-13.6-8.9l-7.8 6C6.6 42.6 14.6 48 24 48z"
+      />
+      <G>
+        <Path fill="none" d="M0 0h48v48H0z" />
+      </G>
     </Svg>
   );
 }
@@ -93,8 +107,10 @@ export function LoginScreen({ navigation }: Props) {
           >
             {/* Hero */}
             <View style={styles.hero}>
-              <GnomeAvatar state="idle" size={110} />
-              <Text variant="headlineMedium" style={styles.title}>Inspector Gnome</Text>
+              <GnomeAvatar state="idle" size={200} />
+              <Text variant="headlineMedium" style={styles.title}>
+                Inspector Gnome
+              </Text>
               <Text variant="bodyMedium" style={styles.subtitle}>
                 AI powered mold detection made easy.
               </Text>
@@ -108,8 +124,15 @@ export function LoginScreen({ navigation }: Props) {
                   onPress={() => setShowForm(true)}
                   activeOpacity={0.85}
                 >
-                  <MaterialCommunityIcons name="lock" size={18} color="#FFFFFF" style={styles.btnIcon} />
-                  <Text variant="labelLarge" style={styles.btnPrimaryText}>Log In</Text>
+                  <MaterialCommunityIcons
+                    name="lock"
+                    size={18}
+                    color="#FFFFFF"
+                    style={styles.btnIcon}
+                  />
+                  <Text variant="labelLarge" style={styles.btnPrimaryText}>
+                    Log In
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Sign Up */}
@@ -118,14 +141,23 @@ export function LoginScreen({ navigation }: Props) {
                   onPress={() => navigation.navigate('Register')}
                   activeOpacity={0.85}
                 >
-                  <MaterialCommunityIcons name="account-plus" size={18} color="#FFFFFF" style={styles.btnIcon} />
-                  <Text variant="labelLarge" style={styles.btnSecondaryText}>Sign Up</Text>
+                  <MaterialCommunityIcons
+                    name="account-plus"
+                    size={18}
+                    color="#FFFFFF"
+                    style={styles.btnIcon}
+                  />
+                  <Text variant="labelLarge" style={styles.btnSecondaryText}>
+                    Sign Up
+                  </Text>
                 </TouchableOpacity>
 
                 {/* OR divider */}
                 <View style={styles.orRow}>
                   <View style={styles.orLine} />
-                  <Text variant="labelSmall" style={styles.orText}>OR</Text>
+                  <Text variant="labelSmall" style={styles.orText}>
+                    OR
+                  </Text>
                   <View style={styles.orLine} />
                 </View>
 
@@ -166,14 +198,24 @@ export function LoginScreen({ navigation }: Props) {
                   By signing up or logging in, you agree to our{' '}
                   <Text
                     style={styles.legalLink}
-                    onPress={() => navigation.navigate('Legal', { title: 'Terms of Service', content: TERMS_OF_SERVICE_MD })}
+                    onPress={() =>
+                      navigation.navigate('Legal', {
+                        title: 'Terms of Service',
+                        content: TERMS_OF_SERVICE_MD,
+                      })
+                    }
                   >
                     Terms of Service
-                  </Text>
-                  {' '}and{' '}
+                  </Text>{' '}
+                  and{' '}
                   <Text
                     style={styles.legalLink}
-                    onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}
+                    onPress={() =>
+                      navigation.navigate('Legal', {
+                        title: 'Privacy Policy',
+                        content: PRIVACY_POLICY_MD,
+                      })
+                    }
                   >
                     Privacy Policy
                   </Text>
@@ -226,14 +268,21 @@ export function LoginScreen({ navigation }: Props) {
                   disabled={isLoading || !email.trim() || !password}
                   activeOpacity={0.85}
                 >
-                  <MaterialCommunityIcons name="lock" size={18} color="#FFFFFF" style={styles.btnIcon} />
+                  <MaterialCommunityIcons
+                    name="lock"
+                    size={18}
+                    color="#FFFFFF"
+                    style={styles.btnIcon}
+                  />
                   <Text variant="labelLarge" style={styles.btnPrimaryText}>
                     {isLoading ? 'Signing in…' : 'Log In'}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => setShowForm(false)} style={styles.backLink}>
-                  <Text variant="bodySmall" style={styles.backLinkText}>← Back</Text>
+                  <Text variant="bodySmall" style={styles.backLinkText}>
+                    ← Back
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

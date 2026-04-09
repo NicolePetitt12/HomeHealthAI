@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ScreenContainer, AppLogo, SubscriptionCard, useDialog } from '../components';
+import { ScreenContainer, WelcomeCard, SubscriptionCard, useDialog } from '../components';
 import { useAuth } from '../hooks/useAuth';
 import { spacing, radii } from '../theme';
 import { PRIVACY_POLICY_MD } from '../content/privacyPolicy';
@@ -39,19 +39,10 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <View style={styles.profileCard}>
-        <View style={styles.logoSide}>
-          <AppLogo size={130} />
-        </View>
-        <View style={styles.infoSide}>
-          <Text variant="headlineSmall" style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-            {user?.user_metadata?.full_name ?? 'Homeowner'}
-          </Text>
-          <Text variant="bodyLarge" style={styles.email} numberOfLines={1} ellipsizeMode="tail">
-            {user?.email}
-          </Text>
-        </View>
-      </View>
+      <WelcomeCard
+        title={user?.user_metadata?.full_name as string ?? 'Homeowner'}
+        subtitle={user?.email ?? ''}
+      />
 
       <SubscriptionCard onManagePlan={() => navigation.navigate('Subscription')} />
 
@@ -129,37 +120,6 @@ export function ProfileScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1C1212',
-    borderRadius: radii.xl,
-    padding: spacing.xl,
-    marginTop: spacing.lg,
-    marginBottom: spacing.xxl,
-    minHeight: 180,
-    borderWidth: 1,
-    borderColor: '#2A1A1A',
-  },
-  logoSide: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoSide: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  name: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 24,
-  },
-  email: {
-    color: '#B0B0B0',
-    fontSize: 16,
-  },
   menu: {
     backgroundColor: '#1C1212',
     borderRadius: radii.lg,

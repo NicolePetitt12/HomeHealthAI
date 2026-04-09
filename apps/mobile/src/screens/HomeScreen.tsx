@@ -2,14 +2,13 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   ScreenContainer,
   ActionCard,
   SectionHeader,
   InspectionListItem,
   GnomeTip,
-  GnomeAvatar,
+  WelcomeCard,
 } from '../components';
 import { spacing, radii } from '../theme';
 import { useAuth } from '../hooks/useAuth';
@@ -89,22 +88,10 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <LinearGradient
-        colors={['#1A0A0A', '#3A0A0A', '#1A0A0A']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.welcomeCard}
-      >
-        <GnomeAvatar state="idle" size={110} />
-        <View style={styles.welcomeText}>
-          <Text variant="headlineSmall" style={styles.welcomeName}>
-            Welcome, {firstName}!
-          </Text>
-          <Text variant="bodyMedium" style={styles.welcomeSub}>
-            What would you like to do today?
-          </Text>
-        </View>
-      </LinearGradient>
+      <WelcomeCard
+        title={`Welcome, ${firstName}!`}
+        subtitle="What would you like to do today?"
+      />
 
       <TouchableOpacity
         style={styles.startScanBtn}
@@ -153,25 +140,6 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  welcomeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radii.xl,
-    padding: spacing.xl,
-    marginTop: spacing.lg,
-    gap: spacing.lg,
-  },
-  welcomeText: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  welcomeName: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  welcomeSub: {
-    color: '#B0A0A0',
-  },
   secondaryActions: {
     flexDirection: 'row',
     gap: spacing.md,

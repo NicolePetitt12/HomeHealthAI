@@ -69,7 +69,7 @@ cp apps/backend/supabase/functions/.env.example apps/backend/supabase/functions/
 |----------|-----------------|
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → Secret key |
 | `STRIPE_WEBHOOK_SECRET` | Output of `stripe-setup` (step 7 below) |
-| `WEBHOOK_BASE_URL` | Your public Supabase URL (e.g. `https://hhai.subacuatica.com.mx`) |
+| `WEBHOOK_BASE_URL` | Your public Supabase URL (e.g. `https://your-domain.com`) |
 
 ### 5. Run database migrations
 

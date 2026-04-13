@@ -53,21 +53,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signInWithProvider(provider: 'google' | 'facebook') {
-    const redirectTo = Linking.createURL('/auth/callback');
+    const redirectTo = Linking.createURL('auth/callback');
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo },
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+      },
     });
     if (error) throw error;
     if (data.url) {
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
       if (result.type === 'success' && result.url) {
-        const { queryParams } = Linking.parse(result.url);
-        if (queryParams?.access_token && queryParams?.refresh_token) {
-          await supabase.auth.setSession({
-            access_token: queryParams.access_token as string,
-            refresh_token: queryParams.refresh_token as string,
-          });
+        // Supabase returns tokens in the URL fragment (#access_token=...)
+        const fragment = result.url.split('#')[1];
+        if (fragment) {
+          const params = Object.fromEntries(new URLSearchParams(fragment));
+          if (params.access_token && params.refresh_token) {
+            await supabase.auth.setSession({
+              access_token: params.access_token,
+              refresh_token: params.refresh_token,
+            });
+          }
         }
       }
     }

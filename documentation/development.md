@@ -51,6 +51,7 @@ cp apps/mobile/.env.example apps/mobile/.env
 | `EXPO_PUBLIC_SUPABASE_URL` | Supabase API URL — use LAN IP, not `127.0.0.1` | `npx supabase status` → API URL |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable/anon key | `npx supabase status` → Publishable |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Stripe Dashboard → Developers → API keys |
+| `EXPO_PUBLIC_SUPPORT_EMAIL` | Support email for Help & Support contact form | Default: `support@home-health-ai.com` |
 
 > **LAN IP:** Use `ip route get 1.1.1.1 | awk '{print $7; exit}'` (Linux) or `ipconfig getifaddr en0` (macOS) to find your machine's LAN IP. Physical devices and emulators can't reach `127.0.0.1`.
 
@@ -64,9 +65,22 @@ cp apps/backend/supabase/functions/.env.example apps/backend/supabase/functions/
 |----------|-------------|---------------|
 | `STRIPE_SECRET_KEY` | Stripe secret key | Stripe Dashboard → Developers → API keys → Secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret | Output of `stripe-setup` function (see Stripe Setup below) |
-| `WEBHOOK_BASE_URL` | Public URL where Edge Functions are reachable | Your production domain, e.g. `https://hhai.subacuatica.com.mx` |
+| `WEBHOOK_BASE_URL` | Public URL where Edge Functions are reachable | Your production domain, e.g. `https://your-domain.com` |
 
 > **Note:** `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-injected by the Supabase runtime — do not set them manually.
+
+### Backend (`apps/backend/.env`)
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+```
+
+| Variable | Description | How to get it |
+|----------|-------------|---------------|
+| `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` | Google OAuth Web Client ID | Google Cloud Console → Credentials → OAuth 2.0 → Web application |
+| `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` | Google OAuth Web Client Secret | Same credential as above |
+
+> These are read by Supabase via `env()` substitution in `config.toml`. See [Google OAuth Setup](#google-oauth-setup) for full instructions.
 
 ---
 
@@ -211,6 +225,124 @@ Use any future expiry date and any 3-digit CVC.
 | `create-portal-session` | User JWT | Creates Stripe Customer Portal session URL |
 | `analyze-scan` | None (internal trigger) | AI mold analysis, called via pg_net trigger |
 | `delete-account` | User JWT | Cancels Stripe subscription and deletes all user data |
+
+---
+
+## Google OAuth Setup
+
+The app supports Google sign-in via Supabase Auth. The mobile code is already wired up (`AuthContext.signInWithProvider` + Google button in `LoginScreen`). You only need to configure credentials.
+
+### 1. Google Cloud Console
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) and select (or create) your project
+2. Navigate to **APIs & Services → Library** and enable the **Google Identity** API
+3. Go to **APIs & Services → OAuth consent screen**:
+   - Choose **External** user type
+   - Fill in app name, support email, and developer contact
+   - Add scopes: `email`, `profile`, `openid`
+4. Go to **Credentials → Create Credentials → OAuth 2.0 Client ID**:
+   - **Web application** — Required by Supabase server-side
+     - Authorized JavaScript origins: `http://127.0.0.1:54321`
+     - Authorized redirect URI: `http://127.0.0.1:54321/auth/v1/callback`
+5. Note the **Client ID** and **Client Secret** from the Web application credential
+
+### 2. Local Development
+
+Add the Google credentials to `apps/backend/.env`:
+
+```
+SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<your-web-client-id>
+SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET=<your-web-client-secret>
+```
+
+The `config.toml` already has the Google provider enabled:
+
+```toml
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+skip_nonce_check = true
+```
+
+> **`skip_nonce_check = true`** is required for local development with Google OAuth.
+
+**Important:** Since the phone cannot reach `127.0.0.1` (it refers to itself), you must forward the Supabase port to the device via ADB:
+
+```bash
+adb reverse tcp:54321 tcp:54321
+```
+
+This makes `127.0.0.1:54321` on the phone point to your computer's Supabase instance. Run this every time you reconnect the device.
+
+Then restart Supabase:
+
+```bash
+cd apps/backend
+npx supabase stop && npx supabase start
+```
+
+### 3. Production Deployment
+
+#### Google Cloud Console
+
+1. Go to your existing OAuth 2.0 credential (or create a new one for production)
+2. Add to **Authorized JavaScript origins**: `https://your-domain.com`
+3. Add to **Authorized redirect URIs**: `https://your-domain.com/auth/v1/callback`
+
+#### Supabase (self-hosted or hosted)
+
+If using **Supabase Dashboard** (hosted):
+
+1. Navigate to **Authentication → Providers → Google**
+2. Toggle **Enable Google provider**
+3. Paste the **Client ID** and **Client Secret** from Google Cloud Console
+4. Copy the **Callback URL** shown by Supabase and ensure it matches the redirect URI in Google Console
+
+If **self-hosted** (e.g., on `your-domain.com`):
+
+1. Set the environment variables on your server:
+   ```
+   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<your-client-id>
+   SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET=<your-client-secret>
+   ```
+2. Ensure your reverse proxy forwards `/auth/v1/callback` to the Supabase Auth service
+3. Set `GOTRUE_SITE_URL=inspectorgnome://auth/callback` so Supabase redirects back to the app after authentication
+4. Set `GOTRUE_URI_ALLOW_LIST=inspectorgnome://auth/callback,https://your-domain.com/auth/v1/callback`
+
+### How it works
+
+```
+User taps "Google"
+  → expo-web-browser opens Google consent screen
+  → User authorizes
+  → Google redirects to Supabase callback (/auth/v1/callback)
+  → Supabase exchanges code for tokens, creates/links auth user
+  → Supabase redirects to app deep link (inspectorgnome://auth/callback#access_token=...)
+  → AuthContext extracts tokens from URL fragment and sets session
+```
+
+### Key configuration (config.toml)
+
+```toml
+[auth]
+site_url = "inspectorgnome://auth/callback"
+additional_redirect_urls = ["http://127.0.0.1:54321/auth/v1/callback", "inspectorgnome://auth/callback"]
+```
+
+- `site_url` must point to the app's deep link so Supabase redirects back to the app after OAuth
+- `additional_redirect_urls` must include both the Supabase callback and the app deep link
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `ERR_CONNECTION_REFUSED` on phone | Run `adb reverse tcp:54321 tcp:54321` to forward Supabase port to the device |
+| `redirect_uri_mismatch` from Google | Ensure redirect URI in Google Console matches exactly: `http://127.0.0.1:54321/auth/v1/callback` (local) or `https://your-domain.com/auth/v1/callback` (production) |
+| Browser opens and closes instantly | Verify `site_url` in `config.toml` is `inspectorgnome://auth/callback` and restart Supabase |
+| "Nonce mismatch" locally | Ensure `skip_nonce_check = true` in `config.toml` under `[auth.external.google]` |
+| User authenticated but no profile | The `handle_new_user` trigger creates profiles on signup — verify it's active in the database |
+| Google rejects private IP in origins/redirects | Google only allows `localhost`/`127.0.0.1` or public domains — use `adb reverse` for local dev |
 
 ---
 

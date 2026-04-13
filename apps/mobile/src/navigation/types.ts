@@ -41,6 +41,7 @@ export type MainStackParamList = {
   Legal: { title: string; content: string };
   ComingSoon: { title: string };
   Subscription: undefined;
+  HelpSupport: undefined;
 };
 
 // ─── Root ────────────────────────────────────────────────────────────────────

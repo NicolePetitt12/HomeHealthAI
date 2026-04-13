@@ -87,7 +87,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <Divider style={styles.divider} />
-        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Help & Support' })}>
+        <TouchableOpacity onPress={() => navigation.navigate('HelpSupport')}>
           <View style={styles.menuItem}>
             <MaterialCommunityIcons name="help-circle-outline" size={22} color="#B0B0B0" />
             <Text variant="bodyLarge" style={styles.menuLabel}>Help & Support</Text>

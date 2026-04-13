@@ -68,7 +68,9 @@ export function ResultsScreen({ navigation, route }: Props) {
     : getMockAnalysis('moderate');
 
   const gnomeState: GnomeState = isProcessing ? 'analyzing'
-    : analysis.riskLevel === 'low' ? 'idle' : 'concern';
+    : analysis.category === 'clean_mold_safely' ? 'noMold'
+    : analysis.category === 'inconclusive' ? 'inconclusive'
+    : 'concern';
 
   const titleColor = TITLE_COLORS[analysis.category] ?? '#FFFFFF';
   const titleIcon = TITLE_ICONS[analysis.category] ?? 'information';

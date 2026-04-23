@@ -1,0 +1,51 @@
+[
+  {
+    "Hydrogen peroxide": "Vinegar",
+    "light staining and surface disinfection support": "mild cleaning where appropriate",
+    "tile, grout, some hard surfaces": "tile, glass, some non-stone surfaces",
+    "test fabrics and finished wood first": "avoid natural stone and incompatible finishes",
+    "can lighten staining": "household option, not a substitute for drying"
+  },
+  {
+    "Hydrogen peroxide": "HEPA vacuum",
+    "light staining and surface disinfection support": "spore capture during cleanup",
+    "tile, grout, some hard surfaces": "dry surfaces and surrounding dust",
+    "test fabrics and finished wood first": "do not use standard vacuum",
+    "can lighten staining": "best paired with damp wipe"
+  },
+  {
+    "Hydrogen peroxide": "Microfiber damp wipe",
+    "light staining and surface disinfection support": "final wipe after HEPA removal",
+    "tile, grout, some hard surfaces": "non-porous surfaces",
+    "test fabrics and finished wood first": "avoid oversaturating materials",
+    "can lighten staining": "change cloths frequently"
+  },
+  {
+    "Hydrogen peroxide": "Concrobium or similar",
+    "light staining and surface disinfection support": "post-cleaning control on some surfaces",
+    "tile, grout, some hard surfaces": "framing, sheathing, hard surfaces",
+    "test fabrics and finished wood first": "follow label; not a shortcut for demolition",
+    "can lighten staining": "commonly used in remediation workflows"
+  },
+  {
+    "Hydrogen peroxide": "Botanical antimicrobial",
+    "light staining and surface disinfection support": "supplemental cleaning",
+    "tile, grout, some hard surfaces": "hard surfaces",
+    "test fabrics and finished wood first": "not a replacement for moisture control",
+    "can lighten staining": "follow label and ventilation guidance"
+  },
+  {
+    "Hydrogen peroxide": "Enzyme cleaner",
+    "light staining and surface disinfection support": "organic residue removal",
+    "tile, grout, some hard surfaces": "some hard surfaces",
+    "test fabrics and finished wood first": "avoid if incompatible with finish",
+    "can lighten staining": "use only as directed"
+  },
+  {
+    "Hydrogen peroxide": "Discard and replace",
+    "light staining and surface disinfection support": "saturated porous materials",
+    "tile, grout, some hard surfaces": "drywall, insulation, carpet pad",
+    "test fabrics and finished wood first": "not applicable",
+    "can lighten staining": "best practice for persistent colonization"
+  }
+]

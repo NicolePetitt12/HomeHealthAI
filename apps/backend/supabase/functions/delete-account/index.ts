@@ -83,7 +83,12 @@ Deno.serve(async (req: Request) => {
       await admin.storage.from('scan-images').remove(paths);
     }
 
-    // 6. Delete scans
+    // 6. Delete notifications, push tokens, and notification preferences
+    await admin.from('notifications').delete().eq('user_id', userId);
+    await admin.from('push_tokens').delete().eq('user_id', userId);
+    await admin.from('notification_preferences').delete().eq('user_id', userId);
+
+    // 7. Delete scans
     await admin.from('scans').delete().eq('user_id', userId);
 
     // 7. Delete profile

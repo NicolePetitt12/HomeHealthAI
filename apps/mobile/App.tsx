@@ -7,16 +7,32 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { store } from './src/store';
-import { AuthProvider } from './src/contexts/AuthContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { OnboardingProvider } from './src/contexts/OnboardingContext';
 import { LegalConsentProvider } from './src/contexts/LegalConsentContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { AppDialogProvider } from './src/components/AppDialog';
 import { theme } from './src/theme';
+import { registerForPushNotifications, configureForegroundNotifications } from './src/services/pushNotifications';
 
 const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '';
 
 const queryClient = new QueryClient();
+
+configureForegroundNotifications();
+
+// Registers push token when authenticated
+function NotificationHandler() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.id) {
+      registerForPushNotifications(user.id);
+    }
+  }, [user?.id]);
+
+  return null;
+}
 
 // Listens for inspectorgnome://subscription/* deep links and refreshes
 // entitlement/subscription data when the user returns from Stripe Checkout.
@@ -52,6 +68,7 @@ export default function App() {
                       <RootNavigator />
                       <StatusBar style="light" />
                       <SubscriptionDeepLinkHandler />
+                      <NotificationHandler />
                     </NavigationContainer>
                   </AppDialogProvider>
                 </PaperProvider>

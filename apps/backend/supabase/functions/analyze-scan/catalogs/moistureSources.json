@@ -1,0 +1,82 @@
+[
+  {
+    "Source Type": "Plumbing leak",
+    "Typical Indicators": "Localized wetness, recurring moisture near supply/drain lines",
+    "Common Rooms": "Bathrooms, kitchens, laundry, under sinks",
+    "Visual Clues": "Cabinet base swelling, repeated spotting below fixtures, staining around penetrations",
+    "Risk Pattern": "Persistent if leak remains active",
+    "Likely Hidden?": "High",
+    "Suggested AI Output": "Possible plumbing-related moisture source",
+    "Professional Follow-up": "Inspect supply lines, traps, shutoffs, wall cavity if recurring"
+  },
+  {
+    "Source Type": "Roof leak",
+    "Typical Indicators": "Ceiling/wall staining after rain, attic-side dampness",
+    "Common Rooms": "Attics, upper ceilings, exterior-adjacent walls",
+    "Visual Clues": "Brown/yellow halos, ceiling texture damage, vertical drip paths",
+    "Risk Pattern": "Can worsen seasonally",
+    "Likely Hidden?": "Moderate-High",
+    "Suggested AI Output": "Possible roof or flashing intrusion",
+    "Professional Follow-up": "Inspect roof assembly, attic decking, penetrations, flashing"
+  },
+  {
+    "Source Type": "HVAC condensation",
+    "Typical Indicators": "Growth around vents, air handler, drain pans, ducts",
+    "Common Rooms": "Closets, mechanical rooms, ceilings near vents",
+    "Visual Clues": "Black spotting near register boots, condensation sheen, rust marks",
+    "Risk Pattern": "Often chronic if drainage/insulation poor",
+    "Likely Hidden?": "Moderate-High",
+    "Suggested AI Output": "Possible HVAC condensation source",
+    "Professional Follow-up": "Check drain pans, line clogs, duct insulation, humidity control"
+  },
+  {
+    "Source Type": "Humidity / condensation",
+    "Typical Indicators": "Diffuse spotting on cool surfaces, windows, corners",
+    "Common Rooms": "Bathrooms, bedrooms, exterior walls, closets",
+    "Visual Clues": "Uniform spotting, window track moisture, cold-corner growth",
+    "Risk Pattern": "Often seasonal and room-wide",
+    "Likely Hidden?": "Moderate",
+    "Suggested AI Output": "High indoor humidity / condensation likely",
+    "Professional Follow-up": "Check ventilation, RH, thermal bridging, occupant habits"
+  },
+  {
+    "Source Type": "Ground / crawlspace moisture",
+    "Typical Indicators": "Lower-wall dampness, musty odor, subfloor concerns",
+    "Common Rooms": "Crawlspaces, lower walls, first-floor closets",
+    "Visual Clues": "Baseboard staining, floor-edge cupping, insulation discoloration",
+    "Risk Pattern": "Can spread broadly over time",
+    "Likely Hidden?": "High",
+    "Suggested AI Output": "Possible ground moisture or crawlspace contribution",
+    "Professional Follow-up": "Inspect vapor barrier, drainage, vents, subfloor moisture"
+  },
+  {
+    "Source Type": "Flood / bulk water event",
+    "Typical Indicators": "Rapid wetting history, broad material impact",
+    "Common Rooms": "Any room after intrusion",
+    "Visual Clues": "Water line, warped materials, staining and debris patterns",
+    "Risk Pattern": "High acute risk",
+    "Likely Hidden?": "Variable",
+    "Suggested AI Output": "Past bulk-water event may explain growth conditions",
+    "Professional Follow-up": "Determine event history, material replacement scope, drying verification"
+  },
+  {
+    "Source Type": "Window / envelope intrusion",
+    "Typical Indicators": "Localized staining below windows or exterior penetrations",
+    "Common Rooms": "Bedrooms, living rooms, exterior-facing walls",
+    "Visual Clues": "Streaking below sill, trim swelling, localized drywall discoloration",
+    "Risk Pattern": "May recur with weather",
+    "Likely Hidden?": "Moderate",
+    "Suggested AI Output": "Possible envelope or window intrusion",
+    "Professional Follow-up": "Inspect sealants, flashing, cladding transitions"
+  },
+  {
+    "Source Type": "Unknown / mixed",
+    "Typical Indicators": "Multiple possible indicators with weak source confidence",
+    "Common Rooms": "Any",
+    "Visual Clues": "Mixed evidence",
+    "Risk Pattern": "Needs contextual review",
+    "Likely Hidden?": "Unknown",
+    "Suggested AI Output": "Moisture source unclear from image alone",
+    "Professional Follow-up": "Use site history, moisture mapping, and more images"
+  }
+]

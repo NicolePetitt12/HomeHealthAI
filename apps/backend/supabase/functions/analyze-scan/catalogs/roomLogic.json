@@ -1,0 +1,90 @@
+[
+  {
+    "Room / Area": "Bathroom",
+    "Primary Risk Drivers": "Humidity, shower condensation, plumbing leaks",
+    "High-Value Checkpoints": "Caulk lines, grout, vanity base, toilet seal area, exhaust fan performance",
+    "Common False Positives": "Soap film, mildew on residue, cosmetic staining",
+    "Escalation Triggers": "Recurring spotting, bubbling drywall, sub-sink moisture",
+    "Homeowner Language": "This area often has humidity-related spotting. Improve drying and check for leaks.",
+    "Professional Language": "Bathroom conditions favor condensation-related growth; evaluate ventilation and concealed plumbing.",
+    "Suggested Next Step": "Check RH, fan, caulk/grout, plumbing under vanity",
+    "Priority": "Moderate"
+  },
+  {
+    "Room / Area": "Kitchen",
+    "Primary Risk Drivers": "Sink leaks, dishwasher leaks, icemaker line, poor ventilation",
+    "High-Value Checkpoints": "Under sink, behind dishwasher, refrigerator line, backsplash penetrations",
+    "Common False Positives": "Food splatter, grease film, old staining",
+    "Escalation Triggers": "Recurring cabinet-base swelling, odor, hidden leak history",
+    "Homeowner Language": "Kitchen moisture can come from plumbing or appliance lines. Recurring spots should be checked.",
+    "Professional Language": "Inspect for active or intermittent plumbing/appliance leaks and substrate impact.",
+    "Suggested Next Step": "Inspect appliance lines and cabinet base; retake images after cleaning",
+    "Priority": "Moderate-High"
+  },
+  {
+    "Room / Area": "Laundry",
+    "Primary Risk Drivers": "Washer hoses, drain overflow, dryer humidity",
+    "High-Value Checkpoints": "Supply hoses, drain standpipe, behind washer, wall base",
+    "Common False Positives": "Detergent residue, lint buildup",
+    "Escalation Triggers": "Recurring dampness, floor edge damage, musty closet-like odor",
+    "Homeowner Language": "Laundry areas can stay damp from hoses or drainage problems.",
+    "Professional Language": "Assess intermittent discharge, hose integrity, drain overflow risk, and adjacent material wetting.",
+    "Suggested Next Step": "Inspect hoses, drain line, pan, nearby drywall and flooring",
+    "Priority": "Moderate-High"
+  },
+  {
+    "Room / Area": "Bedroom",
+    "Primary Risk Drivers": "Window condensation, exterior-wall intrusion, closet stagnation",
+    "High-Value Checkpoints": "Window sills, exterior corners, closet walls",
+    "Common False Positives": "Dust, scuffs, shadowing",
+    "Escalation Triggers": "Cold-corner spotting, repeated window moisture, occupant complaint",
+    "Homeowner Language": "Bedrooms can collect condensation on cooler walls or around windows.",
+    "Professional Language": "Differentiate condensation patterns from envelope intrusion and evaluate closet airflow.",
+    "Suggested Next Step": "Check windows, RH, airflow, exterior wall temperature",
+    "Priority": "Moderate"
+  },
+  {
+    "Room / Area": "Closet",
+    "Primary Risk Drivers": "Low airflow, humidity, exterior wall cooling, hidden leaks",
+    "High-Value Checkpoints": "Back walls, corners, ceiling-wall joints, adjacent plumbing walls",
+    "Common False Positives": "Dust, fabric transfer, shelf scuffs",
+    "Escalation Triggers": "Musty odor, recurring back-wall spotting, adjacent bathroom wall",
+    "Homeowner Language": "Closets can trap moisture because air does not move well.",
+    "Professional Language": "Low-airflow space with possible condensation or concealed wall-source contribution.",
+    "Suggested Next Step": "Improve airflow; inspect adjacent wet walls if recurring",
+    "Priority": "Moderate-High"
+  },
+  {
+    "Room / Area": "Attic",
+    "Primary Risk Drivers": "Roof intrusion, duct sweating, poor ventilation",
+    "High-Value Checkpoints": "Roof decking, insulation, penetrations, duct boots",
+    "Common False Positives": "Old staining, dirt, wood discoloration not microbial",
+    "Escalation Triggers": "Fresh staining, wet decking, chronic vent-area growth",
+    "Homeowner Language": "Attic staining may relate to roof leaks or ventilation issues.",
+    "Professional Language": "Differentiate historic staining from active wetting; inspect decking moisture and ventilation balance.",
+    "Suggested Next Step": "Inspect after rain if possible; check ducts and vents",
+    "Priority": "High"
+  },
+  {
+    "Room / Area": "Crawlspace",
+    "Primary Risk Drivers": "Ground moisture, vapor barrier failure, drainage",
+    "High-Value Checkpoints": "Subfloor, joists, insulation, perimeter walls",
+    "Common False Positives": "Soil staining, dirt, construction residue",
+    "Escalation Triggers": "Musty odor, wood moisture, broad fungal growth pattern",
+    "Homeowner Language": "Crawlspaces can hold moisture from the ground for long periods.",
+    "Professional Language": "Assess vapor control, drainage, ventilation, and structural wood moisture.",
+    "Suggested Next Step": "Inspect vapor barrier and wood moisture; consider professional crawlspace review",
+    "Priority": "High"
+  },
+  {
+    "Room / Area": "HVAC / Mechanical",
+    "Primary Risk Drivers": "Condensate leaks, drain pan issues, duct insulation",
+    "High-Value Checkpoints": "Air handler, drain lines, plenums, nearby drywall",
+    "Common False Positives": "Dust accumulation, rust, normal grime",
+    "Escalation Triggers": "Repeated vent spotting, pan overflow, line clogs",
+    "Homeowner Language": "Mechanical areas can support growth when condensation is not draining correctly.",
+    "Professional Language": "Evaluate condensate management, insulation, and localized amplification near supply paths.",
+    "Suggested Next Step": "Inspect drain pan, line, insulation, surrounding surfaces",
+    "Priority": "High"
+  }
+]

@@ -25,7 +25,7 @@ const MOCK_HIGH: ResultsViewData = {
   id: '00000000-0000-0000-0000-000000000001',
   scanId: '00000000-0000-0000-0000-000000000010',
   riskLevel: 'high',
-  confidence: 0.92,
+  confidence: 92,
   category: 'mold_suspected',
   likelyIssue: 'Mold Suspected',
   description: 'AI detects possible mold in the analyzed area.',
@@ -36,6 +36,11 @@ const MOCK_HIGH: ResultsViewData = {
   ],
   suspectedMoldType: 'Stachybotrys chartarum',
   suspectedMoldDescription: 'A toxigenic mold commonly known as "black mold" that thrives in damp environments with cellulose-rich materials.',
+  moldCandidates: [
+    { type: 'Stachybotrys chartarum', description: 'Commonly known as black mold. Thrives in areas with chronic moisture.', confidence: 72 },
+    { type: 'Aspergillus niger', description: 'Dark mold found in damp indoor environments. Can trigger respiratory issues.', confidence: 20 },
+  ],
+  rejectionReason: null,
   explanation:
     "I can see what looks like active mold growth in this area. The dark discoloration and texture pattern are consistent with mold colonies, likely caused by sustained moisture exposure.",
   findings: [
@@ -73,7 +78,7 @@ const MOCK_MODERATE: ResultsViewData = {
   id: '00000000-0000-0000-0000-000000000002',
   scanId: '00000000-0000-0000-0000-000000000010',
   riskLevel: 'moderate',
-  confidence: 0.74,
+  confidence: 74,
   category: 'inconclusive',
   likelyIssue: 'Inconclusive',
   description: 'AI is unsure about mold presence.',
@@ -84,6 +89,8 @@ const MOCK_MODERATE: ResultsViewData = {
   ],
   suspectedMoldType: null,
   suspectedMoldDescription: null,
+  moldCandidates: [],
+  rejectionReason: null,
   explanation:
     "I found moisture staining that suggests this area has been wet at some point — possibly from a slow leak, condensation, or flooding. There are early indicators that mold could develop if the moisture source is not addressed.",
   findings: [
@@ -115,7 +122,7 @@ const MOCK_LOW: ResultsViewData = {
   id: '00000000-0000-0000-0000-000000000003',
   scanId: '00000000-0000-0000-0000-000000000010',
   riskLevel: 'low',
-  confidence: 0.88,
+  confidence: 88,
   category: 'clean_mold_safely',
   likelyIssue: 'Clean Mold Safely',
   description: 'We recommend cleaning the mold as soon as possible.',
@@ -128,6 +135,8 @@ const MOCK_LOW: ResultsViewData = {
   ],
   suspectedMoldType: null,
   suspectedMoldDescription: null,
+  moldCandidates: [],
+  rejectionReason: null,
   explanation:
     "Surface mold detected that can be safely cleaned without professional help. The growth appears limited and on a non-porous surface.",
   findings: [

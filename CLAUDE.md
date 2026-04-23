@@ -143,3 +143,5 @@ Use your machine's LAN IP (not `127.0.0.1`) so physical devices and emulators ca
 - **Migrations**: Always create via `npx supabase migration new <name>` (run from `apps/backend/`) to get a correct timestamp prefix. Write SQL directly; do not use the Supabase dashboard for schema changes.
 - **RLS**: All new tables must have RLS enabled. Edge Functions use the service role key (bypasses RLS); the mobile Supabase client uses the anon key (subject to RLS).
 - **Edge Function secrets**: Set via `npx supabase secrets set KEY=value`. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-injected — do not set them manually.
+- **OpenAI API key** (required for `analyze-scan`): `npx supabase secrets set OPENAI_API_KEY=sk-...` (run from `apps/backend/`). Without this secret the edge function will throw on the first real scan.
+- **Confidence scale**: stored as `integer 0–100` in `analysis_results.confidence`. Do not multiply/divide by 100 in the mobile app — `ConcernLevelCard` and `ConfidenceBar` receive the raw integer directly.

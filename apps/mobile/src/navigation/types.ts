@@ -42,6 +42,8 @@ export type MainStackParamList = {
   ComingSoon: { title: string };
   Subscription: undefined;
   HelpSupport: undefined;
+  Settings: undefined;
+  Notifications: undefined;
 };
 
 // ─── Root ────────────────────────────────────────────────────────────────────

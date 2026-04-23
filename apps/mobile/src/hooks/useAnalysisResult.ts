@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
-import type { AnalysisResult, Finding } from '@inspector-gnome/shared';
+import type { AnalysisResult, Finding, MoldCandidate } from '@inspector-gnome/shared';
 
 // Maps snake_case DB columns → camelCase AnalysisResult type
 function mapRow(row: Record<string, unknown>): AnalysisResult {
@@ -21,6 +21,8 @@ function mapRow(row: Record<string, unknown>): AnalysisResult {
     suggestedProfessionalType: (row.suggested_professional_type as AnalysisResult['suggestedProfessionalType']) ?? null,
     suspectedMoldType: (row.suspected_mold_type as string | null) ?? null,
     suspectedMoldDescription: (row.suspected_mold_description as string | null) ?? null,
+    moldCandidates: (row.mold_candidates as MoldCandidate[]) ?? [],
+    rejectionReason: (row.rejection_reason as AnalysisResult['rejectionReason']) ?? null,
   };
 }
 

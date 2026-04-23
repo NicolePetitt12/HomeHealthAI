@@ -33,21 +33,55 @@ export function DetailedResultsScreen({ navigation, route }: Props) {
   const scan = currentScan?.id === inspectionId ? currentScan : null;
 
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   useEffect(() => {
-    if (!scan?.imagePath) return;
-    supabase.storage
-      .from('scan-images')
-      .createSignedUrl(scan.imagePath, 3600)
-      .then(({ data }) => {
-        if (data?.signedUrl) setImageUri(data.signedUrl);
-      });
-  }, [scan?.imagePath]);
+    async function loadImage() {
+      // Use imagePath from Redux if available; otherwise fetch from DB
+      let imagePath = scan?.imagePath ?? null;
+      console.log('[DetailedResults] scan.imagePath from Redux:', imagePath);
+
+      if (!imagePath) {
+        console.log('[DetailedResults] Redux scan missing, querying DB for inspectionId:', inspectionId);
+        const { data, error } = await supabase
+          .from('scans')
+          .select('image_path')
+          .eq('id', inspectionId)
+          .single();
+        console.log('[DetailedResults] DB scan query result:', { image_path: data?.image_path, error: error?.message });
+        imagePath = data?.image_path ?? null;
+      }
+
+      if (!imagePath) {
+        console.log('[DetailedResults] No imagePath found, aborting image load');
+        return;
+      }
+
+      console.log('[DetailedResults] Generating signed URL for path:', imagePath);
+      const { data, error } = await supabase.storage
+        .from('scan-images')
+        .createSignedUrl(imagePath, 3600);
+      console.log('[DetailedResults] Signed URL result:', { signedUrl: data?.signedUrl?.slice(0, 80) + '...', error: error?.message });
+
+      if (data?.signedUrl) {
+        // Decode percent-encoded brackets in IPv6 host (e.g. %5B → [ , %5D → ])
+        // so the native Android Image downloader can parse the URL correctly.
+        const safeUrl = data.signedUrl.replace(/%5B/gi, '[').replace(/%5D/gi, ']');
+        setImageUri(safeUrl);
+      } else {
+        setImageError(`signedUrl error: ${error?.message ?? 'unknown'}`);
+      }
+    }
+    loadImage().catch((e) => {
+      console.log('[DetailedResults] loadImage threw:', String(e));
+      setImageError(String(e));
+    });
+  }, [inspectionId, scan?.imagePath]);
 
   const { data: dbAnalysis, isLoading: analysisLoading } = useAnalysisResult(inspectionId);
   // Use real DB data when available; fall back to mock when the scan has no analysis row yet
   const analysis = dbAnalysis ?? (analysisLoading ? null : getMockAnalysis(fallbackRiskLevel ?? 'moderate'));
 
-  const confidence = analysis ? Math.round(analysis.confidence * 100) : 0;
+  const confidence = analysis ? analysis.confidence : 0;
   const professionalLabel = analysis?.suggestedProfessionalType
     ? PROFESSIONAL_LABELS[analysis.suggestedProfessionalType]
     : null;
@@ -60,12 +94,30 @@ export function DetailedResultsScreen({ navigation, route }: Props) {
     <ScreenContainer>
       {/* Image */}
       {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
+        <Image
+          source={{ uri: imageUri }}
+          style={styles.image}
+          resizeMode="cover"
+          onLoadStart={() => console.log('[DetailedResults] Image onLoadStart, uri:', imageUri.slice(0, 80))}
+          onLoad={() => console.log('[DetailedResults] Image onLoad — success')}
+          onError={(e) => {
+            const msg = e.nativeEvent.error ?? 'unknown';
+            console.log('[DetailedResults] Image onError:', msg, 'uri:', imageUri.slice(0, 80));
+            setImageError(`Image load failed: ${msg}`);
+          }}
+        />
       ) : (
         <View style={[styles.image, styles.imagePlaceholder]}>
-          <ActivityIndicator color="#C41E3A" />
+          {imageError ? (
+            <Text variant="bodySmall" style={{ color: '#FF6B6B', textAlign: 'center', padding: 8 }}>{imageError}</Text>
+          ) : (
+            <ActivityIndicator color="#C41E3A" />
+          )}
         </View>
       )}
+      {imageError && imageUri ? (
+        <Text variant="bodySmall" style={{ color: '#FF6B6B', marginBottom: 8 }}>{imageError}</Text>
+      ) : null}
 
       {/* Scan meta */}
       <View style={styles.metaRow}>

@@ -1,0 +1,172 @@
+[
+  {
+    "scenario_id": "SCN-001",
+    "scenario_name": "clean baseline interior",
+    "input": {
+      "case_id": "SCN-001",
+      "photo_id": null,
+      "surface_porosity": "non_porous",
+      "visible_moisture_present": "no",
+      "visible_growth_present": "no",
+      "residue_likely": "no",
+      "recent_water_event": "no",
+      "recurring_issue": "no",
+      "musty_odor_present": "no",
+      "occupant_symptoms_reported": "no",
+      "porous_material_wet": "no",
+      "estimated_area_sqft": 1,
+      "human_review_status": "not_required",
+      "image_quality_status": "good",
+      "indoor_total_spores_m3": 220,
+      "outdoor_total_spores_m3": 1800,
+      "marker_mold_present": "no",
+      "mycotoxin_producer_present": "no",
+      "humidity_percent": 48,
+      "occupant_sensitivity": "standard"
+    },
+    "expected": {
+      "multiple_indicators_count": 0,
+      "decision_tree_output": "low_visual_evidence",
+      "decision_tree_action": "educate_monitor",
+      "iaq_risk_band": "low",
+      "final_action_code": "educate_monitor",
+      "review_gate_triggered": false
+    }
+  },
+  {
+    "scenario_id": "SCN-002",
+    "scenario_name": "hard-surface residue only",
+    "input": {
+      "case_id": "SCN-002",
+      "photo_id": null,
+      "surface_porosity": "non_porous",
+      "visible_moisture_present": "no",
+      "visible_growth_present": "no",
+      "residue_likely": "yes",
+      "recent_water_event": "no",
+      "recurring_issue": "no",
+      "musty_odor_present": "no",
+      "occupant_symptoms_reported": "no",
+      "porous_material_wet": "no",
+      "estimated_area_sqft": 1,
+      "human_review_status": "not_required",
+      "image_quality_status": "good",
+      "indoor_total_spores_m3": null,
+      "outdoor_total_spores_m3": null,
+      "marker_mold_present": "no",
+      "mycotoxin_producer_present": "no",
+      "humidity_percent": 52,
+      "occupant_sensitivity": "standard"
+    },
+    "expected": {
+      "multiple_indicators_count": 0,
+      "decision_tree_output": "surface_residue_monitor",
+      "decision_tree_action": "clean_monitor",
+      "iaq_risk_band": "low",
+      "final_action_code": "clean_monitor",
+      "review_gate_triggered": false
+    }
+  },
+  {
+    "scenario_id": "SCN-003",
+    "scenario_name": "moisture without visible growth",
+    "input": {
+      "case_id": "SCN-003",
+      "photo_id": null,
+      "surface_porosity": "porous",
+      "visible_moisture_present": "yes",
+      "visible_growth_present": "no",
+      "residue_likely": "no",
+      "recent_water_event": "yes",
+      "recurring_issue": "no",
+      "musty_odor_present": "yes",
+      "occupant_symptoms_reported": "no",
+      "porous_material_wet": "yes",
+      "estimated_area_sqft": 1,
+      "human_review_status": "not_required",
+      "image_quality_status": "good",
+      "indoor_total_spores_m3": null,
+      "outdoor_total_spores_m3": null,
+      "marker_mold_present": "unknown",
+      "mycotoxin_producer_present": "unknown",
+      "humidity_percent": 66,
+      "occupant_sensitivity": "standard"
+    },
+    "expected": {
+      "multiple_indicators_count": 3,
+      "decision_tree_output": "moisture_concern",
+      "decision_tree_action": "inspect_source",
+      "iaq_risk_band": "guarded",
+      "final_action_code": "inspect_source",
+      "review_gate_triggered": false
+    }
+  },
+  {
+    "scenario_id": "SCN-004",
+    "scenario_name": "high concern water-damage pattern",
+    "input": {
+      "case_id": "SCN-004",
+      "photo_id": null,
+      "surface_porosity": "porous",
+      "visible_moisture_present": "yes",
+      "visible_growth_present": "yes",
+      "residue_likely": "no",
+      "recent_water_event": "yes",
+      "recurring_issue": "yes",
+      "musty_odor_present": "yes",
+      "occupant_symptoms_reported": "yes",
+      "porous_material_wet": "yes",
+      "estimated_area_sqft": 8,
+      "human_review_status": "not_required",
+      "image_quality_status": "good",
+      "indoor_total_spores_m3": 16053,
+      "outdoor_total_spores_m3": 11893,
+      "marker_mold_present": "yes",
+      "mycotoxin_producer_present": "yes",
+      "humidity_percent": 75,
+      "occupant_sensitivity": "sensitive"
+    },
+    "expected": {
+      "multiple_indicators_count": 6,
+      "decision_tree_output": "high_concern",
+      "decision_tree_action": "professional_inspection",
+      "iaq_risk_band": "high_concern",
+      "final_action_code": "contain_and_inspect",
+      "review_gate_triggered": false
+    }
+  },
+  {
+    "scenario_id": "SCN-005",
+    "scenario_name": "limited-image review gate",
+    "input": {
+      "case_id": "SCN-005",
+      "photo_id": null,
+      "surface_porosity": "porous",
+      "visible_moisture_present": "yes",
+      "visible_growth_present": "yes",
+      "residue_likely": "no",
+      "recent_water_event": "yes",
+      "recurring_issue": "yes",
+      "musty_odor_present": "yes",
+      "occupant_symptoms_reported": "yes",
+      "porous_material_wet": "yes",
+      "estimated_area_sqft": 3,
+      "human_review_status": "recommended",
+      "image_quality_status": "limited",
+      "indoor_total_spores_m3": 1600,
+      "outdoor_total_spores_m3": 800,
+      "marker_mold_present": "yes",
+      "mycotoxin_producer_present": "possible",
+      "humidity_percent": 65,
+      "occupant_sensitivity": "highly_sensitive"
+    },
+    "expected": {
+      "multiple_indicators_count": 6,
+      "decision_tree_output": "high_concern",
+      "decision_tree_action": "professional_inspection",
+      "iaq_risk_band": "high_concern",
+      "final_action_code": "collect_more_data",
+      "review_gate_triggered": true
+    }
+  }
+]

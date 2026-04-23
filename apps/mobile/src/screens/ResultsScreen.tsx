@@ -40,6 +40,21 @@ const TITLE_ICONS: Record<string, string> = {
   clean_mold_safely: 'spray-bottle',
 };
 
+const REJECTION_COPY: Record<string, { title: string; message: string }> = {
+  low_quality: {
+    title: 'Image Too Unclear',
+    message: 'The photo was too blurry or dark to analyze. Try again with better lighting and hold the camera steady.',
+  },
+  non_mold: {
+    title: 'No Surface Detected',
+    message: "I couldn't identify any mold-related content in this photo. Try a closer shot of the suspect area on a wall, ceiling, or floor.",
+  },
+  out_of_scope: {
+    title: 'Outside My Scope',
+    message: 'This photo is outside what I can analyze. I work best on indoor surfaces like walls, ceilings, and areas where mold might grow.',
+  },
+};
+
 export function ResultsScreen({ navigation, route }: Props) {
   const { inspectionId } = route.params;
   const currentScan = useAppSelector((s) => s.inspection.currentScan);
@@ -47,14 +62,28 @@ export function ResultsScreen({ navigation, route }: Props) {
 
   const [imageUri, setImageUri] = useState<string | null>(null);
   useEffect(() => {
-    if (!scan?.imagePath) return;
-    supabase.storage
-      .from('scan-images')
-      .createSignedUrl(scan.imagePath, 3600)
-      .then(({ data }) => { if (data?.signedUrl) setImageUri(data.signedUrl); });
-  }, [scan?.imagePath]);
+    async function loadImage() {
+      let imagePath = scan?.imagePath ?? null;
+      if (!imagePath) {
+        const { data } = await supabase
+          .from('scans')
+          .select('image_path')
+          .eq('id', inspectionId)
+          .single();
+        imagePath = data?.image_path ?? null;
+      }
+      if (!imagePath) return;
+      const { data } = await supabase.storage
+        .from('scan-images')
+        .createSignedUrl(imagePath, 3600);
+      // Decode percent-encoded IPv6 brackets (%5B → [ , %5D → ]) so the native
+      // Android Image downloader can parse the host correctly.
+      if (data?.signedUrl) setImageUri(data.signedUrl.replace(/%5B/gi, '[').replace(/%5D/gi, ']'));
+    }
+    loadImage();
+  }, [inspectionId, scan?.imagePath]);
 
-  const { data: realAnalysis } = useAnalysisResult(scan?.id);
+  const { data: realAnalysis } = useAnalysisResult(scan?.id ?? inspectionId);
   const [analysisTimedOut, setAnalysisTimedOut] = useState(false);
   useEffect(() => {
     if (realAnalysis) return;
@@ -116,18 +145,31 @@ export function ResultsScreen({ navigation, route }: Props) {
             </View>
           </View>
 
-          {/* Recommendations */}
-          <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.recTitle}>
-              {analysis.recommendationTitle}
-            </Text>
-            {analysis.recommendations.map((rec, i) => (
-              <View key={i} style={styles.recRow}>
-                <MaterialCommunityIcons name="minus" size={16} color="#B0B0B0" style={styles.bullet} />
-                <Text variant="bodyMedium" style={styles.recText}>{rec}</Text>
-              </View>
-            ))}
-          </View>
+          {/* Rejection banner (replaces recommendations when image was rejected) */}
+          {analysis.rejectionReason ? (
+            <View style={styles.rejectionCard}>
+              <MaterialCommunityIcons name="image-off-outline" size={28} color="#FFB74D" style={styles.rejectionIcon} />
+              <Text variant="titleSmall" style={styles.rejectionTitle}>
+                {REJECTION_COPY[analysis.rejectionReason]?.title ?? 'Scan Could Not Be Analyzed'}
+              </Text>
+              <Text variant="bodyMedium" style={styles.rejectionMessage}>
+                {REJECTION_COPY[analysis.rejectionReason]?.message ?? 'Please try again with a clearer image.'}
+              </Text>
+            </View>
+          ) : (
+            /* Recommendations */
+            <View style={styles.section}>
+              <Text variant="titleMedium" style={styles.recTitle}>
+                {analysis.recommendationTitle}
+              </Text>
+              {analysis.recommendations.map((rec, i) => (
+                <View key={i} style={styles.recRow}>
+                  <MaterialCommunityIcons name="minus" size={16} color="#B0B0B0" style={styles.bullet} />
+                  <Text variant="bodyMedium" style={styles.recText}>{rec}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Action buttons */}
           <View style={styles.actionRow}>
@@ -141,13 +183,15 @@ export function ResultsScreen({ navigation, route }: Props) {
             >
               <Text variant="labelLarge" style={styles.btnRescanText}>Rescan Area</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.btnLearnMore}
-              onPress={() => navigation.navigate('DetailedResults', { inspectionId, riskLevel: analysis.riskLevel })}
-              activeOpacity={0.85}
-            >
-              <Text variant="labelLarge" style={styles.btnLearnMoreText}>Learn More</Text>
-            </TouchableOpacity>
+            {!analysis.rejectionReason && (
+              <TouchableOpacity
+                style={styles.btnLearnMore}
+                onPress={() => navigation.navigate('DetailedResults', { inspectionId, riskLevel: analysis.riskLevel })}
+                activeOpacity={0.85}
+              >
+                <Text variant="labelLarge" style={styles.btnLearnMoreText}>Learn More</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </>
       )}
@@ -262,5 +306,28 @@ const styles = StyleSheet.create({
   btnLearnMoreText: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  rejectionCard: {
+    backgroundColor: '#1C1810',
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: '#3A3020',
+    padding: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  rejectionIcon: {
+    marginBottom: spacing.xs,
+  },
+  rejectionTitle: {
+    color: '#FFB74D',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  rejectionMessage: {
+    color: '#B0B0B0',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

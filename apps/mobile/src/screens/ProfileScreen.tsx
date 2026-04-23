@@ -71,7 +71,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <Divider style={styles.divider} />
-        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Notifications' })}>
+        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <View style={styles.menuItem}>
             <MaterialCommunityIcons name="bell-outline" size={22} color="#B0B0B0" />
             <Text variant="bodyLarge" style={styles.menuLabel}>Notifications</Text>
@@ -79,7 +79,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <Divider style={styles.divider} />
-        <TouchableOpacity onPress={() => navigation.navigate('ComingSoon', { title: 'Settings' })}>
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
           <View style={styles.menuItem}>
             <MaterialCommunityIcons name="cog-outline" size={22} color="#B0B0B0" />
             <Text variant="bodyLarge" style={styles.menuLabel}>Settings</Text>

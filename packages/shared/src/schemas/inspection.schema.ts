@@ -61,6 +61,16 @@ export type CreateScan = z.infer<typeof CreateScanSchema>;
 
 // ----- Analysis Result -----
 
+export const RejectionReason = z.enum(['low_quality', 'non_mold', 'out_of_scope']);
+export type RejectionReason = z.infer<typeof RejectionReason>;
+
+export const MoldCandidateSchema = z.object({
+  type: z.string(),
+  description: z.string(),
+  confidence: z.number().int().min(0).max(100),
+});
+export type MoldCandidate = z.infer<typeof MoldCandidateSchema>;
+
 export const FindingSchema = z.object({
   type: z.string(),
   description: z.string(),
@@ -73,7 +83,7 @@ export const AnalysisResultSchema = z.object({
   id: z.string().uuid(),
   scanId: z.string().uuid(),
   riskLevel: RiskLevel,
-  confidence: z.number().min(0).max(1),
+  confidence: z.number().int().min(0).max(100),
   findings: z.array(FindingSchema),
   explanation: z.string().nullable(),
   nextSteps: z.array(z.string()),
@@ -87,6 +97,8 @@ export const AnalysisResultSchema = z.object({
   suggestedProfessionalType: ProfessionalType.nullable(),
   suspectedMoldType: z.string().nullable(),
   suspectedMoldDescription: z.string().nullable(),
+  moldCandidates: z.array(MoldCandidateSchema),
+  rejectionReason: RejectionReason.nullable(),
 });
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 
@@ -221,3 +233,36 @@ export const EntitlementSchema = z.object({
   quotaPeriodEnd: z.string().datetime().nullable().optional(),
 });
 export type Entitlement = z.infer<typeof EntitlementSchema>;
+
+// ----- Notifications -----
+
+export const NotificationType = z.enum([
+  'scan_completed',
+  'subscription_changed',
+  'app_update',
+  'promotion',
+]);
+export type NotificationType = z.infer<typeof NotificationType>;
+
+export const NotificationSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  type: NotificationType,
+  title: z.string(),
+  body: z.string(),
+  data: z.record(z.unknown()).nullable(),
+  isRead: z.boolean(),
+  createdAt: z.string().datetime(),
+});
+export type Notification = z.infer<typeof NotificationSchema>;
+
+export const NotificationPreferencesSchema = z.object({
+  userId: z.string().uuid(),
+  pushEnabled: z.boolean(),
+  scanCompleted: z.boolean(),
+  subscriptionChanged: z.boolean(),
+  appUpdate: z.boolean(),
+  promotion: z.boolean(),
+  updatedAt: z.string().datetime(),
+});
+export type NotificationPreferences = z.infer<typeof NotificationPreferencesSchema>;

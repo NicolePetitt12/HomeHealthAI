@@ -7,6 +7,7 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { sendNotification } from '../_shared/notify.ts';
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -139,7 +140,7 @@ async function upsertSubscription(
   // Find our internal customer row
   const { data: customer, error: custErr } = await admin
     .from('customers')
-    .select('id')
+    .select('id, profile_id')
     .eq('stripe_customer_id', stripeCustomerId)
     .single();
 
@@ -169,6 +170,26 @@ async function upsertSubscription(
   );
 
   if (error) throw error;
+
+  // Send subscription notification
+  if (customer.profile_id) {
+    const tierLabel = planTier.charAt(0).toUpperCase() + planTier.slice(1);
+    const notifMap: Record<string, { title: string; body: string }> = {
+      active: { title: 'Plan Updated', body: `Your plan has been upgraded to ${tierLabel}.` },
+      canceled: { title: 'Subscription Canceled', body: `Your ${tierLabel} subscription has been canceled.` },
+      past_due: { title: 'Payment Issue', body: 'Your payment is past due. Please update your payment method.' },
+    };
+    const notif = notifMap[sub.status];
+    if (notif) {
+      await sendNotification(admin, {
+        userId: customer.profile_id,
+        type: 'subscription_changed',
+        title: notif.title,
+        body: notif.body,
+        data: { screen: 'Subscription' },
+      });
+    }
+  }
 }
 
 // ─── invoice.payment_* ───────────────────────────────────────────────────────

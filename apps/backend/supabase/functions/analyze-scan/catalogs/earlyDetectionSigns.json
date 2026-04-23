@@ -1,0 +1,86 @@
+[
+  {
+    "sign_name": "Micro-speckling",
+    "description": null,
+    "typical_materials": null,
+    "confidence_note": null,
+    "suggested_action": null
+  },
+  {
+    "sign_name": "Moisture halo",
+    "description": "circular or irregular stain edge around leak path",
+    "typical_materials": "drywall, plaster",
+    "confidence_note": "higher if color gradient present",
+    "suggested_action": "check leak/condensation"
+  },
+  {
+    "sign_name": "Glossy sheen",
+    "description": "localized wet reflective patch",
+    "typical_materials": "paint, wood, caulk",
+    "confidence_note": "higher with repeated humidity",
+    "suggested_action": "reduce RH and inspect source"
+  },
+  {
+    "sign_name": "Texture lift",
+    "description": "raised or fuzzy surface compared with adjacent area",
+    "typical_materials": "wallpaper, drywall",
+    "confidence_note": "higher if edge is irregular",
+    "suggested_action": "capture macro image and inspect"
+  },
+  {
+    "sign_name": "Concentric rings",
+    "description": "ringed colony structure",
+    "typical_materials": "window trim, caulk",
+    "confidence_note": "suggestive for Alternaria-like growth",
+    "suggested_action": "clean/inspect promptly"
+  },
+  {
+    "sign_name": "Velvet patch",
+    "description": "matte velvet-like patch",
+    "typical_materials": "painted surfaces, wood",
+    "confidence_note": "common in Cladosporium/Alternaria",
+    "suggested_action": "confirm moisture and sample if needed"
+  },
+  {
+    "sign_name": "Pink-black streaking",
+    "description": "pink or black streaks in condensation zones",
+    "typical_materials": "window tracks, caulk",
+    "confidence_note": "common for Aureobasidium-like growth",
+    "suggested_action": "clean and control condensation"
+  },
+  {
+    "sign_name": "Green powder bloom",
+    "description": "fine green dust-like bloom",
+    "typical_materials": "HVAC dust, insulation",
+    "confidence_note": "common in Aspergillus/Penicillium patterns",
+    "suggested_action": "use PPE and HEPA clean"
+  },
+  {
+    "sign_name": "Cottony white growth",
+    "description": "soft tufted early growth",
+    "typical_materials": "cellulose materials",
+    "confidence_note": "higher concern on wet drywall",
+    "suggested_action": "remove wet porous material"
+  },
+  {
+    "sign_name": "Dark wet-zone patch",
+    "description": "dark patch confined to chronically wet area",
+    "typical_materials": "subfloors, walls",
+    "confidence_note": "higher concern if slimy",
+    "suggested_action": "isolate and assess"
+  },
+  {
+    "sign_name": "Pepper vent spotting",
+    "description": "speckling around registers",
+    "typical_materials": "HVAC diffusers, ceiling",
+    "confidence_note": "higher if repeated after cleaning",
+    "suggested_action": "inspect ducts and RH"
+  },
+  {
+    "sign_name": "Bubbling paint",
+    "description": "surface deformation with discoloration",
+    "typical_materials": "painted drywall",
+    "confidence_note": "not mold alone but strong moisture precursor",
+    "suggested_action": "open wall if persistent"
+  }
+]

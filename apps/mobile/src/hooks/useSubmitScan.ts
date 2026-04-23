@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { useAppDispatch } from '../store/hooks';
 import { setCurrentScan } from '../store/slices/inspectionSlice';
 import { compressImage, uploadScanImage, createScanRecord, triggerAnalysis } from '../services/upload';
-import type { Scan } from '@inspector-gnome/shared';
+import type { Scan, YesNoUnknown } from '@inspector-gnome/shared';
 
 export type SubmitStage = 'compressing' | 'uploading' | 'creating' | 'done';
 
@@ -17,6 +17,12 @@ export interface SubmitScanInput {
   imageUri: string;
   location: string;
   notes: string | null;
+  recurringIssue: YesNoUnknown;
+  mustyOdorPresent: YesNoUnknown;
+  recentWaterEvent: YesNoUnknown;
+  occupantSymptomsReported: YesNoUnknown;
+  humidityPercent: number | null;
+  temperatureF: number | null;
 }
 
 export function useSubmitScan(onProgress: (p: SubmitProgress) => void) {
@@ -27,7 +33,7 @@ export function useSubmitScan(onProgress: (p: SubmitProgress) => void) {
   onProgressRef.current = onProgress;
 
   return useMutation<Scan, Error, SubmitScanInput>({
-    mutationFn: async ({ imageUri, location, notes }) => {
+    mutationFn: async ({ imageUri, location, notes, recurringIssue, mustyOdorPresent, recentWaterEvent, occupantSymptomsReported, humidityPercent, temperatureF }) => {
       if (!user) throw new Error('Not authenticated');
 
       onProgressRef.current({ stage: 'compressing', percent: 10 });
@@ -37,7 +43,14 @@ export function useSubmitScan(onProgress: (p: SubmitProgress) => void) {
       const storagePath = await uploadScanImage(user.id, compressedUri);
 
       onProgressRef.current({ stage: 'creating', percent: 80 });
-      const scan = await createScanRecord(user.id, storagePath, location, notes);
+      const scan = await createScanRecord(user.id, storagePath, location, notes, {
+        recurringIssue,
+        mustyOdorPresent,
+        recentWaterEvent,
+        occupantSymptomsReported,
+        humidityPercent,
+        temperatureF,
+      });
 
       // Invalidate entitlement immediately so the scan counter reflects the new scan.
       queryClient.invalidateQueries({ queryKey: ['entitlement'] });

@@ -56,6 +56,12 @@ export function HistoryScreen({ navigation }: Props) {
       location: scan.location,
       notes: scan.notes,
       status: scan.status as 'pending' | 'processing' | 'completed' | 'failed',
+      recurringIssue: 'unknown' as const,
+      mustyOdorPresent: 'unknown' as const,
+      recentWaterEvent: 'unknown' as const,
+      occupantSymptomsReported: 'unknown' as const,
+      humidityPercent: null,
+      temperatureF: null,
       createdAt: scan.createdAt,
       updatedAt: scan.createdAt,
     }));

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { YesNoUnknown, OccupantSensitivity } from './triage.schema';
 
 // ----- Enums (match Postgres enum types) -----
 
@@ -26,6 +27,7 @@ export const ProfileSchema = z.object({
   avatarUrl: z.string().nullable(),
   role: UserRole,
   phone: z.string().nullable(),
+  occupantSensitivity: OccupantSensitivity,
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -36,6 +38,7 @@ export const UpdateProfileSchema = ProfileSchema.pick({
   phone: true,
   avatarUrl: true,
   role: true,
+  occupantSensitivity: true,
 }).partial();
 export type UpdateProfile = z.infer<typeof UpdateProfileSchema>;
 
@@ -48,15 +51,27 @@ export const ScanSchema = z.object({
   location: z.string().min(1),
   notes: z.string().nullable(),
   status: ScanStatus,
+  recurringIssue: YesNoUnknown,
+  mustyOdorPresent: YesNoUnknown,
+  recentWaterEvent: YesNoUnknown,
+  occupantSymptomsReported: YesNoUnknown,
+  humidityPercent: z.number().min(0).max(100).nullable(),
+  temperatureF: z.number().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
 export type Scan = z.infer<typeof ScanSchema>;
 
-export const CreateScanSchema = ScanSchema.pick({
-  location: true,
-  notes: true,
-});
+export const CreateScanSchema = ScanSchema
+  .pick({ location: true, notes: true })
+  .extend({
+    recurringIssue: YesNoUnknown.optional(),
+    mustyOdorPresent: YesNoUnknown.optional(),
+    recentWaterEvent: YesNoUnknown.optional(),
+    occupantSymptomsReported: YesNoUnknown.optional(),
+    humidityPercent: z.number().min(0).max(100).nullable().optional(),
+    temperatureF: z.number().nullable().optional(),
+  });
 export type CreateScan = z.infer<typeof CreateScanSchema>;
 
 // ----- Analysis Result -----

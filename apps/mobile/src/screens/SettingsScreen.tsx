@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Text, TextInput, Button, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ScreenContainer, useDialog } from '../components';
+import { ScreenContainer, useDialog, FilterChipRow } from '../components';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../services/supabase';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '../hooks/useNotificationPreferences';
@@ -23,6 +23,13 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 type Props = MainStackScreenProps<'Settings'>;
+
+const SENSITIVITY_OPTIONS = [
+  { label: 'Standard', value: 'standard' },
+  { label: 'Sensitive', value: 'sensitive' },
+  { label: 'Highly Sensitive', value: 'highly_sensitive' },
+  { label: 'Not Sure', value: 'unknown' },
+];
 
 function PrefToggle({ label, description, value, disabled, onToggle }: {
   label: string;
@@ -76,8 +83,10 @@ export function SettingsScreen(_props: Props) {
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [occupantSensitivity, setOccupantSensitivity] = useState('unknown');
   const [isSaving, setIsSaving] = useState(false);
   const [profileExpanded, setProfileExpanded] = useState(true);
+  const [householdExpanded, setHouseholdExpanded] = useState(true);
   const [notifExpanded, setNotifExpanded] = useState(true);
   const { data: prefs } = useNotificationPreferences();
   const updatePrefs = useUpdateNotificationPreferences();
@@ -88,11 +97,12 @@ export function SettingsScreen(_props: Props) {
 
     supabase
       .from('profiles')
-      .select('phone')
+      .select('phone, occupant_sensitivity')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setPhone(data.phone);
+        if (data?.occupant_sensitivity) setOccupantSensitivity(data.occupant_sensitivity);
       });
   }, [user]);
 
@@ -102,7 +112,11 @@ export function SettingsScreen(_props: Props) {
     try {
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ full_name: fullName.trim(), phone: phone.trim() || null })
+        .update({
+          full_name: fullName.trim(),
+          phone: phone.trim() || null,
+          occupant_sensitivity: occupantSensitivity,
+        })
         .eq('id', user.id);
       if (profileError) throw profileError;
 
@@ -123,6 +137,11 @@ export function SettingsScreen(_props: Props) {
   function toggleProfile() {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setProfileExpanded((v) => !v);
+  }
+
+  function toggleHousehold() {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setHouseholdExpanded((v) => !v);
   }
 
   function toggleNotif() {
@@ -183,6 +202,46 @@ export function SettingsScreen(_props: Props) {
               onPress={handleSave}
               loading={isSaving}
               disabled={isSaving || !fullName.trim()}
+              buttonColor="#C41E3A"
+              textColor="#FFFFFF"
+              style={styles.saveBtn}
+              contentStyle={styles.saveBtnContent}
+            >
+              Save
+            </Button>
+          </View>
+        )}
+
+        <View style={styles.divider} />
+
+        {/* Household */}
+        <TouchableOpacity style={styles.accordionHeader} onPress={toggleHousehold} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="account-group-outline" size={20} color="#B0B0B0" />
+          <Text variant="bodyLarge" style={styles.accordionLabel}>Household</Text>
+          <MaterialCommunityIcons
+            name={householdExpanded ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color="#666666"
+          />
+        </TouchableOpacity>
+        {householdExpanded && (
+          <View style={styles.accordionBody}>
+            <Text variant="bodySmall" style={styles.householdLabel}>
+              Are there children, elderly, pregnant individuals, or people with asthma in the home?
+            </Text>
+            <Text variant="bodySmall" style={styles.householdHint}>
+              This helps the engine apply extra caution when assessing your results.
+            </Text>
+            <FilterChipRow
+              options={SENSITIVITY_OPTIONS}
+              selected={occupantSensitivity}
+              onSelect={setOccupantSensitivity}
+            />
+            <Button
+              mode="contained"
+              onPress={handleSave}
+              loading={isSaving}
+              disabled={isSaving}
               buttonColor="#C41E3A"
               textColor="#FFFFFF"
               style={styles.saveBtn}
@@ -281,5 +340,13 @@ const styles = StyleSheet.create({
   },
   saveBtnContent: {
     paddingVertical: spacing.sm,
+  },
+  householdLabel: {
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  householdHint: {
+    color: '#888888',
+    marginTop: -spacing.xs,
   },
 });

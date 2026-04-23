@@ -7,6 +7,8 @@ import { toAnalysisRow } from './mappers/toAnalysisRow.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type YesNoUnknown = 'yes' | 'no' | 'unknown';
+
 interface ScanRecord {
   id: string;
   user_id: string;
@@ -14,6 +16,12 @@ interface ScanRecord {
   location: string;
   notes: string | null;
   status: string;
+  recurring_issue: YesNoUnknown;
+  musty_odor_present: YesNoUnknown;
+  recent_water_event: YesNoUnknown;
+  occupant_symptoms_reported: YesNoUnknown;
+  humidity_percent: number | null;
+  temperature_f: number | null;
 }
 
 // ─── Image helpers ────────────────────────────────────────────────────────────
@@ -69,11 +77,12 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // 1. Enforce scan quota (server-side defense)
+  // 1. Enforce scan quota (server-side defense) + fetch user sensitivity
   const SCAN_LIMITS: Record<string, number> = { free: 3, home: 20, pro: -1 };
-  const [{ data: planTier }, { data: scanCount }] = await Promise.all([
+  const [{ data: planTier }, { data: scanCount }, { data: profile }] = await Promise.all([
     supabase.rpc('get_user_plan_tier', { p_user_id: scan.user_id }),
     supabase.rpc('get_monthly_scan_count', { p_user_id: scan.user_id }),
+    supabase.from('profiles').select('occupant_sensitivity').eq('id', scan.user_id).single(),
   ]);
   const tier: string = planTier ?? 'free';
   const count: number = scanCount ?? 0;
@@ -105,8 +114,17 @@ Deno.serve(async (req: Request) => {
       notes: scan.notes,
     });
 
-    // 6. Build the 30-field triage input (visual + defaults for MVP)
-    const triageInput = buildTriageInput(scan, features);
+    // 6. Build the 30-field triage input (visual + P1 context overrides)
+    const overrides: Partial<TriageInput> = {
+      recurring_issue:            scan.recurring_issue ?? 'unknown',
+      musty_odor_present:         scan.musty_odor_present ?? 'unknown',
+      recent_water_event:         scan.recent_water_event ?? 'unknown',
+      occupant_symptoms_reported: scan.occupant_symptoms_reported ?? 'unknown',
+      occupant_sensitivity:       (profile as { occupant_sensitivity?: string } | null)?.occupant_sensitivity ?? 'unknown',
+      humidity_percent:           scan.humidity_percent ?? null,
+      temperature_f:              scan.temperature_f ?? null,
+    };
+    const triageInput = buildTriageInput(scan, features, overrides);
 
     // 7. Run deterministic vNext.1 engine (Steps 1-6)
     const triageOutput = runTriage(triageInput);

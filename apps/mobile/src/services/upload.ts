@@ -1,7 +1,7 @@
 import * as ImageManipulator from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase } from './supabase';
-import type { Scan } from '@inspector-gnome/shared';
+import type { Scan, YesNoUnknown } from '@inspector-gnome/shared';
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const MAX_WIDTH = 1920;
@@ -50,11 +50,21 @@ export async function uploadScanImage(userId: string, imageUri: string): Promise
 
 // ─── Create Scan Record ───────────────────────────────────────────────────────
 
+export interface ScanContextInput {
+  recurringIssue: YesNoUnknown;
+  mustyOdorPresent: YesNoUnknown;
+  recentWaterEvent: YesNoUnknown;
+  occupantSymptomsReported: YesNoUnknown;
+  humidityPercent: number | null;
+  temperatureF: number | null;
+}
+
 export async function createScanRecord(
   userId: string,
   imagePath: string,
   location: string,
   notes: string | null,
+  context: ScanContextInput,
 ): Promise<Scan> {
   const { data, error } = await supabase
     .from('scans')
@@ -64,6 +74,12 @@ export async function createScanRecord(
       location,
       notes,
       status: 'pending',
+      recurring_issue: context.recurringIssue,
+      musty_odor_present: context.mustyOdorPresent,
+      recent_water_event: context.recentWaterEvent,
+      occupant_symptoms_reported: context.occupantSymptomsReported,
+      humidity_percent: context.humidityPercent,
+      temperature_f: context.temperatureF,
     })
     .select()
     .single();
@@ -77,6 +93,12 @@ export async function createScanRecord(
     location: data.location,
     notes: data.notes,
     status: data.status,
+    recurringIssue: data.recurring_issue,
+    mustyOdorPresent: data.musty_odor_present,
+    recentWaterEvent: data.recent_water_event,
+    occupantSymptomsReported: data.occupant_symptoms_reported,
+    humidityPercent: data.humidity_percent ?? null,
+    temperatureF: data.temperature_f ?? null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -96,6 +118,12 @@ export async function triggerAnalysis(scan: Scan): Promise<void> {
         location: scan.location,
         notes: scan.notes,
         status: scan.status,
+        recurring_issue: scan.recurringIssue,
+        musty_odor_present: scan.mustyOdorPresent,
+        recent_water_event: scan.recentWaterEvent,
+        occupant_symptoms_reported: scan.occupantSymptomsReported,
+        humidity_percent: scan.humidityPercent,
+        temperature_f: scan.temperatureF,
       },
     },
   });

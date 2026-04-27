@@ -117,6 +117,12 @@ public = false
 file_size_limit = "10MiB"
 allowed_mime_types = ["image/jpeg", "image/png", "image/webp", "image/heic"]
 
+# Invoice PDFs bucket (private) — written by edge functions only, read by owner via signed URL
+[storage.buckets.invoices]
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["application/pdf"]
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true
@@ -411,4 +417,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.stripe-webhook]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.test-email]
 verify_jwt = false

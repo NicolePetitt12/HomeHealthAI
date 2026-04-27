@@ -1,6 +1,8 @@
 {
   "imports": {
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
-    "stripe": "https://esm.sh/stripe@17"
+    "stripe": "https://esm.sh/stripe@17",
+    "nodemailer": "npm:nodemailer@6.9.10",
+    "pdf-lib": "https://esm.sh/pdf-lib@1.17.1"
   }
 }

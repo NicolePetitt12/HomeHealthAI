@@ -55,6 +55,14 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <Divider style={styles.divider} />
+        <Divider style={styles.divider} />
+        <TouchableOpacity onPress={() => navigation.navigate('PaymentHistory')}>
+          <View style={styles.menuItem}>
+            <MaterialCommunityIcons name="receipt-outline" size={22} color="#B0B0B0" />
+            <Text variant="bodyLarge" style={styles.menuLabel}>Payment History</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#3A3A3A" />
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Legal', { title: 'Privacy Policy', content: PRIVACY_POLICY_MD })}>
           <View style={styles.menuItem}>
             <MaterialCommunityIcons name="shield-account-outline" size={22} color="#B0B0B0" />

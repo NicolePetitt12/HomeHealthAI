@@ -8,6 +8,17 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { sendNotification } from '../_shared/notify.ts';
+import { sendEmail } from '../_shared/email/index.ts';
+import type {
+  SubscriptionConfirmedEmailData,
+  PaymentSucceededEmailData,
+  PaymentFailedEmailData,
+  SubscriptionCanceledEmailData,
+  PlanChangedEmailData,
+  RenewalReminderEmailData,
+  PaymentMethodUpdatedEmailData,
+  BillingInfoUpdatedEmailData,
+} from '../_shared/email/index.ts';
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -61,10 +72,12 @@ async function handleEvent(stripe: Stripe, event: Stripe.Event): Promise<void> {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   );
 
+  console.log(`[webhook] received event: ${event.type} (id=${event.id})`);
+
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      await handleCheckoutCompleted(admin, session);
+      await handleCheckoutCompleted(admin, stripe, session);
       break;
     }
     case 'customer.subscription.created': {
@@ -74,7 +87,7 @@ async function handleEvent(stripe: Stripe, event: Stripe.Event): Promise<void> {
     }
     case 'customer.subscription.updated': {
       const sub = event.data.object as Stripe.Subscription;
-      await upsertSubscription(admin, stripe, sub);
+      await upsertSubscription(admin, stripe, sub, event);
       break;
     }
     case 'customer.subscription.deleted': {
@@ -84,12 +97,30 @@ async function handleEvent(stripe: Stripe, event: Stripe.Event): Promise<void> {
     }
     case 'invoice.payment_succeeded': {
       const invoice = event.data.object as Stripe.Invoice;
-      await upsertInvoice(admin, invoice, 'paid');
+      await upsertInvoice(admin, stripe, invoice, 'paid');
       break;
     }
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
-      await upsertInvoice(admin, invoice, invoice.status ?? 'open');
+      await upsertInvoice(admin, stripe, invoice, invoice.status ?? 'open');
+      break;
+    }
+    case 'invoice.upcoming': {
+      const invoice = event.data.object as Stripe.Invoice;
+      await handleInvoiceUpcoming(admin, stripe, invoice);
+      break;
+    }
+    case 'customer.source.updated':
+    case 'payment_method.attached':
+    case 'payment_method.updated':
+    case 'payment_method.detached': {
+      const paymentMethod = event.data.object as Stripe.PaymentMethod;
+      await handlePaymentMethodUpdated(admin, stripe, paymentMethod);
+      break;
+    }
+    case 'customer.updated': {
+      const customer = event.data.object as Stripe.Customer;
+      await handleCustomerUpdated(admin, customer);
       break;
     }
     default:
@@ -101,6 +132,7 @@ async function handleEvent(stripe: Stripe, event: Stripe.Event): Promise<void> {
 
 async function handleCheckoutCompleted(
   admin: ReturnType<typeof createClient>,
+  stripe: Stripe,
   session: Stripe.Checkout.Session,
 ): Promise<void> {
   const stripeCustomerId = typeof session.customer === 'string'
@@ -124,6 +156,37 @@ async function handleCheckoutCompleted(
   );
 
   if (error) throw error;
+
+  // Send subscription confirmed email
+  try {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', profileId)
+      .single();
+
+    if (profile && session.amount_total) {
+      const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+      const priceId = subscription.items.data[0]?.price?.id ?? '';
+      const planTier = await resolvePlanTier(stripe, priceId);
+
+      const emailData: SubscriptionConfirmedEmailData = {
+        type: 'subscription_confirmed',
+        to: profile.email,
+        subject: 'Subscription Confirmed - Inspector Gnome',
+        recipientName: profile.full_name || 'there',
+        planName: planTier.charAt(0).toUpperCase() + planTier.slice(1),
+        amount: session.amount_total,
+        currency: session.currency || 'usd',
+      };
+
+      sendEmail(emailData).catch((err) => {
+        console.error('Failed to send subscription confirmed email:', err);
+      });
+    }
+  } catch (err) {
+    console.error('Error preparing subscription confirmed email:', err);
+  }
 }
 
 // ─── customer.subscription.* ─────────────────────────────────────────────────
@@ -132,6 +195,7 @@ async function upsertSubscription(
   admin: ReturnType<typeof createClient>,
   stripe: Stripe,
   sub: Stripe.Subscription,
+  event?: Stripe.Event,
 ): Promise<void> {
   const stripeCustomerId = typeof sub.customer === 'string'
     ? sub.customer
@@ -148,6 +212,13 @@ async function upsertSubscription(
     console.warn(`upsertSubscription: no customer found for ${stripeCustomerId}`);
     return;
   }
+
+  // Get previous subscription data for plan change detection
+  const { data: prevSub } = await admin
+    .from('subscriptions')
+    .select('plan_tier, status')
+    .eq('stripe_subscription_id', sub.id)
+    .single();
 
   const priceId = sub.items.data[0]?.price?.id ?? '';
   const planTier = await resolvePlanTier(stripe, priceId);
@@ -171,8 +242,50 @@ async function upsertSubscription(
 
   if (error) throw error;
 
-  // Send subscription notification
+  // Send email notifications
   if (customer.profile_id) {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', customer.profile_id)
+      .single();
+
+    if (profile) {
+      const recipientName = profile.full_name || 'there';
+
+      // Subscription canceled
+      if (sub.status === 'canceled' || (prevSub && prevSub.status !== 'canceled' && sub.cancel_at_period_end)) {
+        const emailData: SubscriptionCanceledEmailData = {
+          type: 'subscription_canceled',
+          to: profile.email,
+          subject: 'Subscription Canceled - Inspector Gnome',
+          recipientName,
+          endDate: new Date((sub as unknown as { current_period_end: number }).current_period_end * 1000).toLocaleDateString(),
+        };
+
+        sendEmail(emailData).catch((err) => {
+          console.error('Failed to send subscription canceled email:', err);
+        });
+      }
+      // Plan changed
+      else if (prevSub && prevSub.plan_tier !== planTier) {
+        const emailData: PlanChangedEmailData = {
+          type: 'plan_changed',
+          to: profile.email,
+          subject: 'Plan Changed - Inspector Gnome',
+          recipientName,
+          oldPlan: prevSub.plan_tier.charAt(0).toUpperCase() + prevSub.plan_tier.slice(1),
+          newPlan: planTier.charAt(0).toUpperCase() + planTier.slice(1),
+          effectiveDate: new Date().toLocaleDateString(),
+        };
+
+        sendEmail(emailData).catch((err) => {
+          console.error('Failed to send plan changed email:', err);
+        });
+      }
+    }
+
+    // Send subscription notification
     const tierLabel = planTier.charAt(0).toUpperCase() + planTier.slice(1);
     const notifMap: Record<string, { title: string; body: string }> = {
       active: { title: 'Plan Updated', body: `Your plan has been upgraded to ${tierLabel}.` },
@@ -196,6 +309,7 @@ async function upsertSubscription(
 
 async function upsertInvoice(
   admin: ReturnType<typeof createClient>,
+  stripe: Stripe,
   invoice: Stripe.Invoice,
   status: string,
 ): Promise<void> {
@@ -209,7 +323,7 @@ async function upsertInvoice(
 
   const { data: customer, error: custErr } = await admin
     .from('customers')
-    .select('id')
+    .select('id, profile_id')
     .eq('stripe_customer_id', stripeCustomerId)
     .single();
 
@@ -222,6 +336,17 @@ async function upsertInvoice(
     ? invoice.subscription
     : (invoice.subscription as Stripe.Subscription | null)?.id ?? null;
 
+  // Resolve plan_tier from our subscriptions table so it is frozen on the invoice
+  let planTier: string | null = null;
+  if (subscriptionId) {
+    const { data: sub } = await admin
+      .from('subscriptions')
+      .select('plan_tier')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle();
+    planTier = sub?.plan_tier ?? null;
+  }
+
   const { error } = await admin.from('invoices').upsert(
     {
       customer_id: customer.id,
@@ -230,6 +355,7 @@ async function upsertInvoice(
       amount_paid: invoice.amount_paid ?? 0,
       currency: invoice.currency ?? 'usd',
       status,
+      plan_tier: planTier,
       invoice_url: invoice.hosted_invoice_url ?? null,
       period_start: invoice.period_start
         ? new Date(invoice.period_start * 1000).toISOString()
@@ -242,6 +368,187 @@ async function upsertInvoice(
   );
 
   if (error) throw error;
+
+  // Send email notifications
+  if (customer.profile_id) {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', customer.profile_id)
+      .single();
+
+    if (profile && invoice.amount_due) {
+      const recipientName = profile.full_name || 'there';
+
+      if (status === 'paid') {
+        const emailData: PaymentSucceededEmailData = {
+          type: 'payment_succeeded',
+          to: profile.email,
+          subject: 'Payment Successful - Inspector Gnome',
+          recipientName,
+          amount: invoice.amount_paid ?? 0,
+          currency: invoice.currency ?? 'usd',
+          invoiceUrl: invoice.hosted_invoice_url ?? undefined,
+        };
+
+        sendEmail(emailData).catch((err) => {
+          console.error('Failed to send payment succeeded email:', err);
+        });
+      } else if (status === 'open' || status === 'uncollectible') {
+        const nextPaymentAttempt = invoice.next_payment_attempt
+          ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString()
+          : undefined;
+
+        const emailData: PaymentFailedEmailData = {
+          type: 'payment_failed',
+          to: profile.email,
+          subject: 'Payment Failed - Inspector Gnome',
+          recipientName,
+          amount: invoice.amount_due,
+          currency: invoice.currency ?? 'usd',
+          retryDate: nextPaymentAttempt,
+        };
+
+        sendEmail(emailData).catch((err) => {
+          console.error('Failed to send payment failed email:', err);
+        });
+      }
+    }
+  }
+}
+
+// ─── invoice.upcoming ────────────────────────────────────────────────────────
+
+async function handleInvoiceUpcoming(
+  admin: ReturnType<typeof createClient>,
+  stripe: Stripe,
+  invoice: Stripe.Invoice,
+): Promise<void> {
+  const stripeCustomerId = typeof invoice.customer === 'string'
+    ? invoice.customer
+    : (invoice.customer as Stripe.Customer | null)?.id;
+
+  if (!stripeCustomerId || !invoice.amount_due) return;
+
+  const { data: customer } = await admin
+    .from('customers')
+    .select('profile_id')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .single();
+
+  if (!customer?.profile_id) return;
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', customer.profile_id)
+    .single();
+
+  if (!profile) return;
+
+  const renewalDate = invoice.period_end
+    ? new Date(invoice.period_end * 1000).toLocaleDateString()
+    : 'soon';
+
+  const emailData: RenewalReminderEmailData = {
+    type: 'renewal_reminder',
+    to: profile.email,
+    subject: 'Subscription Renewal Reminder - Inspector Gnome',
+    recipientName: profile.full_name || 'there',
+    renewalDate,
+    amount: invoice.amount_due,
+    currency: invoice.currency ?? 'usd',
+  };
+
+  sendEmail(emailData).catch((err) => {
+    console.error('Failed to send renewal reminder email:', err);
+  });
+}
+
+// ─── payment_method.updated ──────────────────────────────────────────────────
+
+async function handlePaymentMethodUpdated(
+  admin: ReturnType<typeof createClient>,
+  stripe: Stripe,
+  paymentMethod: Stripe.PaymentMethod,
+): Promise<void> {
+  const stripeCustomerId = typeof paymentMethod.customer === 'string'
+    ? paymentMethod.customer
+    : (paymentMethod.customer as Stripe.Customer | null)?.id;
+
+  if (!stripeCustomerId) {
+    console.log('handlePaymentMethodUpdated: payment method has no customer attached, skipping');
+    return;
+  }
+
+  const { data: customer } = await admin
+    .from('customers')
+    .select('profile_id')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .single();
+
+  if (!customer?.profile_id) {
+    console.log(`handlePaymentMethodUpdated: no local customer for ${stripeCustomerId} (likely a CLI-generated test event)`);
+    return;
+  }
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', customer.profile_id)
+    .single();
+
+  if (!profile) {
+    console.log(`handlePaymentMethodUpdated: no profile for ${customer.profile_id}`);
+    return;
+  }
+
+  const emailData: PaymentMethodUpdatedEmailData = {
+    type: 'payment_method_updated',
+    to: profile.email,
+    subject: 'Payment Method Updated - Inspector Gnome',
+    recipientName: profile.full_name || 'there',
+    last4: paymentMethod.card?.last4,
+    brand: paymentMethod.card?.brand,
+  };
+
+  sendEmail(emailData).catch((err) => {
+    console.error('Failed to send payment method updated email:', err);
+  });
+}
+
+// ─── customer.updated ────────────────────────────────────────────────────────
+
+async function handleCustomerUpdated(
+  admin: ReturnType<typeof createClient>,
+  customer: Stripe.Customer,
+): Promise<void> {
+  const { data: dbCustomer } = await admin
+    .from('customers')
+    .select('profile_id')
+    .eq('stripe_customer_id', customer.id)
+    .single();
+
+  if (!dbCustomer?.profile_id) return;
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', dbCustomer.profile_id)
+    .single();
+
+  if (!profile) return;
+
+  const emailData: BillingInfoUpdatedEmailData = {
+    type: 'billing_info_updated',
+    to: profile.email,
+    subject: 'Billing Information Updated - Inspector Gnome',
+    recipientName: profile.full_name || 'there',
+  };
+
+  sendEmail(emailData).catch((err) => {
+    console.error('Failed to send billing info updated email:', err);
+  });
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

@@ -18,6 +18,7 @@ import { PhotoReviewScreen } from '../screens/PhotoReviewScreen';
 import { LegalScreen } from '../screens/LegalScreen';
 import { ComingSoonScreen } from '../screens/ComingSoonScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
+import { PaymentHistoryScreen } from '../screens/PaymentHistoryScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
@@ -96,6 +97,16 @@ function MainNavigator() {
         options={{
           headerShown: true,
           title: 'Plans',
+          headerStyle: { backgroundColor: '#1A1A1A' },
+          headerTintColor: '#FFFFFF',
+        }}
+      />
+      <Main.Screen
+        name="PaymentHistory"
+        component={PaymentHistoryScreen}
+        options={{
+          headerShown: true,
+          title: 'Payment History',
           headerStyle: { backgroundColor: '#1A1A1A' },
           headerTintColor: '#FFFFFF',
         }}

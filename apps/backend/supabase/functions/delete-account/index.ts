@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'stripe';
+import { sendEmail } from '../_shared/email/index.ts';
+import type { AccountDeletedEmailData } from '../_shared/email/index.ts';
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -31,6 +33,15 @@ Deno.serve(async (req: Request) => {
     });
   }
   const userId = user.id;
+
+  // Capture before deletion so these remain available after auth.users is removed
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('full_name')
+    .eq('id', userId)
+    .maybeSingle();
+  const userEmail = user.email;
+  const recipientName = profile?.full_name || 'there';
 
   try {
     // 1. Cancel any active Stripe subscriptions and remove the customer record.
@@ -97,6 +108,19 @@ Deno.serve(async (req: Request) => {
     // 8. Delete auth user (requires service role)
     const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
     if (deleteError) throw deleteError;
+
+    if (userEmail) {
+      const emailData: AccountDeletedEmailData = {
+        type: 'account_deleted',
+        to: userEmail,
+        subject: 'Account Deleted - Inspector Gnome',
+        recipientName,
+        deletedAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      };
+      sendEmail(emailData).catch((err) => {
+        console.error('Failed to send account deleted email:', err);
+      });
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

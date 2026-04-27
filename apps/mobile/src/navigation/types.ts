@@ -41,6 +41,7 @@ export type MainStackParamList = {
   Legal: { title: string; content: string };
   ComingSoon: { title: string };
   Subscription: undefined;
+  PaymentHistory: undefined;
   HelpSupport: undefined;
   Settings: undefined;
   Notifications: undefined;

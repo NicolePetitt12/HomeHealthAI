@@ -24,4 +24,6 @@ export { WelcomeCard } from './WelcomeCard';
 export { FaqSection } from './FaqSection';
 export { ContactForm } from './ContactForm';
 export { AppDialogProvider, useDialog } from './AppDialog';
+export { PaymentStatusBadge } from './PaymentStatusBadge';
+export { PaymentListItem } from './PaymentListItem';
 export type { GnomeState } from './GnomeAvatar';

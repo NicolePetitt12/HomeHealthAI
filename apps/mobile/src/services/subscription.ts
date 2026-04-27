@@ -81,16 +81,30 @@ export async function getSubscription(): Promise<Subscription | null> {
   };
 }
 
-export async function getInvoices(): Promise<Invoice[]> {
+export interface InvoicesPage {
+  items: Invoice[];
+  nextPage: number | null;
+}
+
+export async function getInvoices({
+  pageParam = 0,
+  pageSize = 10,
+}: {
+  pageParam?: number;
+  pageSize?: number;
+} = {}): Promise<InvoicesPage> {
+  const from = pageParam * pageSize;
+  const to = from + pageSize - 1;
+
   const { data, error } = await supabase
     .from('invoices')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(20);
+    .range(from, to);
 
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
+  const items = (data ?? []).map((row) => ({
     id: row.id,
     customerId: row.customer_id,
     stripeInvoiceId: row.stripe_invoice_id,
@@ -102,7 +116,23 @@ export async function getInvoices(): Promise<Invoice[]> {
     periodStart: row.period_start,
     periodEnd: row.period_end,
     createdAt: row.created_at,
+    pdfPath: row.pdf_path ?? null,
+    planTier: row.plan_tier ?? null,
   }));
+
+  return {
+    items,
+    nextPage: items.length < pageSize ? null : pageParam + 1,
+  };
+}
+
+export async function downloadInvoicePdf(invoiceId: string): Promise<{ url: string }> {
+  const { data, error } = await supabase.functions.invoke('generate-invoice-pdf', {
+    body: { invoice_id: invoiceId },
+  });
+  if (error) throw await extractFunctionError(error);
+  if (!data?.url) throw new Error('No PDF URL returned');
+  return { url: data.url as string };
 }
 
 // ─── Payment Sheet ───────────────────────────────────────────────────────────

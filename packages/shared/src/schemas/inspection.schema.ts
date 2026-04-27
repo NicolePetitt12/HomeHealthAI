@@ -218,6 +218,8 @@ export const InvoiceSchema = z.object({
   periodStart: z.string().datetime().nullable(),
   periodEnd: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
+  pdfPath: z.string().nullable(),
+  planTier: PlanTier.nullable(),
 });
 export type Invoice = z.infer<typeof InvoiceSchema>;
 

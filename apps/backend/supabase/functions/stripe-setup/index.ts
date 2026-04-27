@@ -41,6 +41,12 @@ const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   'customer.subscription.deleted',
   'invoice.payment_succeeded',
   'invoice.payment_failed',
+  'invoice.upcoming',
+  'customer.updated',
+  'customer.source.updated',
+  'payment_method.attached',
+  'payment_method.updated',
+  'payment_method.detached',
 ];
 
 Deno.serve(async (req: Request) => {
@@ -126,7 +132,20 @@ Deno.serve(async (req: Request) => {
   let webhookResult: { id: string; secret?: string; status: string };
 
   if (existingWebhook) {
-    webhookResult = { id: existingWebhook.id, status: 'already_exists' };
+    const currentEvents = new Set(existingWebhook.enabled_events);
+    const targetEvents = new Set(WEBHOOK_EVENTS);
+    const needsUpdate =
+      currentEvents.size !== targetEvents.size ||
+      [...targetEvents].some((e) => !currentEvents.has(e));
+
+    if (needsUpdate) {
+      const updated = await stripe.webhookEndpoints.update(existingWebhook.id, {
+        enabled_events: WEBHOOK_EVENTS,
+      });
+      webhookResult = { id: updated.id, status: 'updated' };
+    } else {
+      webhookResult = { id: existingWebhook.id, status: 'already_exists' };
+    }
   } else {
     const webhook = await stripe.webhookEndpoints.create({
       url: webhookUrl,

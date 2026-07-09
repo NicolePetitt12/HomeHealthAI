@@ -110,22 +110,8 @@ export async function createScanRecord(
 
 export async function triggerAnalysis(scan: Scan): Promise<void> {
   const { error } = await supabase.functions.invoke('analyze-scan', {
-    body: {
-      record: {
-        id: scan.id,
-        user_id: scan.userId,
-        image_path: scan.imagePath,
-        location: scan.location,
-        notes: scan.notes,
-        status: scan.status,
-        recurring_issue: scan.recurringIssue,
-        musty_odor_present: scan.mustyOdorPresent,
-        recent_water_event: scan.recentWaterEvent,
-        occupant_symptoms_reported: scan.occupantSymptomsReported,
-        humidity_percent: scan.humidityPercent,
-        temperature_f: scan.temperatureF,
-      },
-    },
+    body: { scan_id:  scan.id },
+
   });
   if (error) throw error;
 }

@@ -1,18 +1,19 @@
 /**
- * stripe-setup — Idempotent Stripe product/price/webhook configuration.
+ * stripe-setup - Idempotent Stripe product/price/webhook configuration.
  *
- * Run once (or as needed) with the service role key to configure the Stripe
- * account for Inspector Gnome subscriptions.
+ * Disabled unless STRIPE_SETUP_ENABLED=true and the caller provides
+ * x-internal-admin-secret matching STRIPE_SETUP_ADMIN_SECRET.
  *
  * Invoke:
  *   curl -X POST https://<project>.supabase.co/functions/v1/stripe-setup \
- *     -H "Authorization: Bearer <service_role_key>"
+ *     -H "x-internal-admin-secret: <STRIPE_SETUP_ADMIN_SECRET>"
  *
- * It is safe to run multiple times — existing resources are never duplicated.
+ * It is safe to run multiple times - existing resources are never duplicated.
  */
 
 import Stripe from 'stripe';
 
+const ADMIN_SECRET_HEADER = 'x-internal-admin-secret';
 const APP_TAG = 'inspector-gnome';
 
 const PLANS = [
@@ -49,7 +50,39 @@ const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   'payment_method.detached',
 ];
 
+function timingSafeEqual(a: string | null, b: string | null): boolean {
+  if (!a || !b || a.length !== b.length) return false;
+
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function authorizeStripeSetup(req: Request): Response | null {
+  if (Deno.env.get('STRIPE_SETUP_ENABLED') !== 'true') {
+    return json({ error: 'Not found' }, 404);
+  }
+
+  const adminSecret = Deno.env.get('STRIPE_SETUP_ADMIN_SECRET');
+  if (!adminSecret) {
+    return json({ error: 'Stripe setup is not configured' }, 500);
+  }
+
+  if (!timingSafeEqual(req.headers.get(ADMIN_SECRET_HEADER), adminSecret)) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
+  const setupAccessError = authorizeStripeSetup(req);
+  if (setupAccessError) {
+    return setupAccessError;
+  }
+
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
@@ -179,3 +212,4 @@ function json(body: unknown, status = 200): Response {
     headers: { 'Content-Type': 'application/json' },
   });
 }
+

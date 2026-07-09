@@ -410,9 +410,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.analyze-scan]
 verify_jwt = true
 
-[functions.stripe-setup]
-verify_jwt = false
-
 [functions.get-plans]
 verify_jwt = false
 
